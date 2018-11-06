@@ -16,7 +16,6 @@ struct RecBuffer{
 	int num_of_entries;
 	unsigned char reserved[12];
 	unsigned char data[2016];
-
 };
 
 
@@ -49,10 +48,28 @@ struct RelationCache{
 	unsigned char unused[81]
 };
 
+struct AttributeCache{
+	char rel_name[ATTR_SIZE];
+	char attr_name[ATTR_SIZE];
+	int attr_type;
+	bool primary_flag;
+	int root_block;
+	int offset;
+	struct AttributeCache *next;
+};
+
 union BlockBuffer{
 	struct RecBuffer recordbuffer;
 	struct IndBuffer indexbufferr;
 	struct RelationCache relcache;
+};
+
+struct OpenRelTable{
+	char rel_name[ATTR_SIZE];
+	struct AttributeCache *attr_list;
+	// Block num and slot num of corresponding entry in RELCAT.
+	int block_num;
+	int slot_num;
 };
 
 
@@ -60,6 +77,7 @@ union BlockBuffer{
 class Buffer{
 	public:
 		union BlockBuffer buffer[32];
+		struct OpenRelTable rel_table[8];
 		//struct RelationCache rel_cache[2];
 	private:
 		unsigned char block_alloc_map[DISK_BLOCKS];
@@ -136,15 +154,44 @@ class Buffer{
 		}
 
 		struct RecBuffer *getRecordBlock(int block_num){
-			int buffer_index;
-			for(int iter = 0; iter < 32; iter){
-				if(block[iter] == block_num){
-					buffer_index = iter;
-					return &(buffer[buffer_index].recordbuffer);
+			int buffer_index = getBufferIndex(block_num);
+			if(buffer_index == -1){
+				buffer_index = getFreeBuffer();
+				if(buffer_index != -1){
+					block[buffer_index] = block_num;
+					readblock(&buffer[buffer_index],block_num);
+				}
+				else{
+					return NULL;
 				}
 			}
+
+			int blktype = getBlockType(buffer_index);
+			if(blktype != REC){
+				return NULL;
+			}
+
+			return (RecBuffer *) &buffer[buffer_index];
 		}
 
+		struct IndBuffer *getIndexBlock(int block_num){
+			int buffer_index = getBufferIndex(block_num);
+			if(buffer_index == -1){
+				buffer_index = getFreeBuffer();
+				if(buffer_index != -1){
+					block[buffer_index] = block_num;
+					readblock(&buffer[buffer_index],block_num);
+				}
+				else{
+					return NULL;
+				}
+			}
 
+			int blktype = getBlockType(buffer_index);
+			if(blktype != IND){
+				return NULL;
+			}
+
+			return (IndBuffer *) &buffer[buffer_index];
+		}
 };
-

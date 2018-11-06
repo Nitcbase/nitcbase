@@ -5,7 +5,7 @@
 #define SUCCESS 0
 #define FAILURE -1
 
-#define USED
-#define UNUSED
-#define ALLOTED 
+#define USED 1 
+#define UNUSED 0 
+#define ALLOTED 2
 

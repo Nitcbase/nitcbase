@@ -9,3 +9,5 @@
 #define UNUSED 0 
 #define ALLOTED 2
 
+#define REC 0
+#define IND 1

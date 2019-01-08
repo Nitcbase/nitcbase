@@ -5,22 +5,23 @@ union Attribute{
 };
 
 struct Index{
+	int lchild;
 	union Attribute attrval;
 	int block;
 	int slot;
+	unsigned char unused[8];
+	int rchild;
 };
 
-struct AttributeCache{
-	char rel_name[ATTR_SIZE];
-	char attr_name[ATTR_SIZE];
-	int attr_type;
-	bool primary_flag;
-	int root_block;
-	int offset;
-	struct AttributeCache *next;
+struct HeadInfo{
+	int block_type;
+	int pblock;
+	int lblock;
+	int rblock;
+	int num_entries;
 };
 
-struct BufferMetaInfo{
+struct BufferMetaInfo {
 	bool free;
 	bool dirty;
 	int block_num;
@@ -29,93 +30,87 @@ struct BufferMetaInfo{
 
 class BlockBuffer{
 protected:
-	char *data_ptr;
+	unsigned char *data_ptr;
 	struct BufferMetaInfo *meta_ptr;
 
 public:
-	BlockBuffer(char *data,struct BufferMetaInfo *meta){
+	BlockBuffer(unsigned char *data,struct BufferMetaInfo *meta){
 		this->data_ptr=data;
 		this->meta_ptr=meta;
 	}
-	int getBlockType(){
-		int block_type = *(int *)(this->data_ptr);
-		return block_type;
+	struct HeadInfo getheader(){
+		struct HeadInfo head;
+		head->block_type=*(int *)(this->data_ptr);
+		head->pblock= *(int *)(this->data_ptr + 4);
+		head->lblock= *(int *)(this->data_ptr + 2*4);
+		head->rblock= *(int *)(this->data_ptr + 3*4);
+		head->num_entries= *(int *)(this->data_ptr + 4*4);
+		return head;
+	}
+	
+	void setheader(struct HeadInfo head){
+		*(struct HeadInfo*(this->data_ptr))=head;
+		return;
 	}
 
-	int getPblock(){
-		int p_block = *(int *)(this->data_ptr + 4);
-		return p_block;
-	}
-
-	int getLblock(){
-		int l_block = *(int *)(this->data_ptr + 2*4);
-		return l_block;
-	}
-
-	int getRblock(){
-		int r_block = *(int *)(this->data_ptr + 3*4);
-		return r_block;
-	}
-
-	int getNumEntries(){
-		int num_entries = *(int *)(this->data_ptr + 4*4);
-			return num_entries;
-	}
-
-	void setPblock(int block_num){
-		*(int *)(this->data_ptr + 4) = block_num;
-	}
-
-	void setLblock(int block_num){
-		*(int *)(this->data_ptr + 2*4) = block_num;
-	}
-
-	void setRblock(int block_num){
-		*(int *)(this->data_ptr + 3*4) = block_num;
-	}
-
-	void setNumEntries(int num){
-		*(int *)(this->data_ptr + 4*4) = num;
-	}
 };
 
 class RecBuffer : public BlockBuffer{
 public:
-	char *getSlotmap(){
-		return this->data_ptr + 32;
+	void getSlotmap(unsigned char *slotmap, int num_of_slots){
+		memcpy(slotmap,this->data_ptr+32,num_of_slots);
+		return;
+	}
+	
+	void setSlotmap(unsigned char *slotmap, int num_of_slots){
+		memcpy(this->data_ptr+32,slotmap,num_of_slots);
+		return;
+	}
+	
+	void getRecord(union Attribute *rec,int slot_num, int num_of_attrib, int num_of_slots){
+		
+		memcpy(void*(this->data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),void*(rec),num_of_attrib*ATTR_SIZE);
+		return;
+	}
+	void setRecord(union Attribute *rec,int slot_num, int num_of_attrib, int num_of_slots){
+		
+		memcpy(void*(rec),void*(this->data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),num_of_attrib*ATTR_SIZE);
+		return;
 	}
 
-	union Attribute *getRecord(int slot_num, int num_of_attrib, int num_of_slots){
-		return union Attribute* (this->data_ptr + 32 + num_of_slots + slot_num*num_of_attrib*ATTR_SIZE);
+	/*union Attribute getAttribute(int slot_num, int num_of_attrib, int num_of_slots, int attr_offset){
+		union Attribute attr;
+		attr=*(union Attribute* (this->data_ptr + 32 + num_of_slots + (slot_num*num_of_attrib + attr_offset)*ATTR_SIZE ));
+		return attr;
+		//return union Attribute* (this->data_ptr + 32 + num_of_slots + (slot_num*num_of_attrib + attr_offset)*ATTR_SIZE );
 	}
-
-	union Attribute *getAttribute(int slot_num, int num_of_attrib, int num_of_slots, int attr_offset){
-		return union Attribute* (this->data_ptr + 32 + num_of_slots + (slot_num*num_of_attrib + attr_offset)*ATTR_SIZE );
-	}
+	void setAttribute(union Attribute attr,int slot_num, int num_of_attrib, int num_of_slots, int attr_offset){
+		*(union Attribute* (this->data_ptr + 32 + num_of_slots + (slot_num*num_of_attrib + attr_offset)*ATTR_SIZE ))=attr;
+		return;
+	}*/
 
 };
 
 class IndBuffer : public BlockBuffer{
 public:
+	struct IndexVal getIndexval(int index_num){
+		struct Index IndexEntry;
+		IndexEntry=*(struct IndexVal* (this->data_ptr + 32 + index_num*36)); 
+		return IndexEntry;
+	}
+	void setIndexval(struct Index IndexEntry,int index_num){
+		*(struct IndexVal* (this->data_ptr + 32 + index_num*36))=IndexEntry; 
+		return ;
+	}
+	/*
 	struct Index *getIndex(int index_num){
 		return struct Index* (this->data_ptr + 32 + index_num*32);
 	}
 
 	int *getChild(int child_num){
 		return  (this->data_ptr + 1792 + child_num*4);
-	}
+	}*/
 }
-
-struct OpenRelTable{
-	char relname[ATTR_SIZE];
-	int num_attr;
-	int num_rec;
-	int first_blk;
-	int num_slots_blk;
-	struct AttributeCache *attr_list;
-	bool free, dirty;
-	int block, slot;
-};
 
 class Buffer{
 private:
@@ -284,47 +279,5 @@ public:
 
 		block_alloc_map[block_num]=UNUSED;
 	}
-
-	/*Open Relation table (Relation cache) and attribute cache related functions*/
-	int getFreeRelId(){
-
-	}
-
-	int getRelId(char relname[ATTR_SIZE]){
-
-	}
-
-	int getNumAttr(int rel_id){
-
-	}
-
-	int getNumRec(int rel_id){
-
-	}
-
-	int getFirstBlk(int rel_id){
-
-	}
-
-	int getNumSlotsBlk(int rel_id){
-
-	}
-
-	struct AttributeCache* getAttrCache(int rel_id){
-
-	}
-
-	void setAttrCache(struct AttributeCache* attr_list){
-
-	}
-
-	void setNumRec(int rel_id, int num_rec){
-
-	}
-
-	void setFirstBlk(int rel_id, int first_blk){
-
-	}
-
 
 };

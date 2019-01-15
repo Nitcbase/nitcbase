@@ -19,6 +19,9 @@ struct HeadInfo{
 	int lblock;
 	int rblock;
 	int num_entries;
+	int num_attrs; //not useful for index block
+	int num_slots;
+	unsigned char reserved[4];
 };
 
 struct BufferMetaInfo {
@@ -30,26 +33,36 @@ struct BufferMetaInfo {
 
 class BlockBuffer{
 protected:
-	unsigned char *data_ptr;
-	struct BufferMetaInfo *meta_ptr;
+	//unsigned char *data_ptr;
+	//struct BufferMetaInfo *meta_ptr;
+	int block_num;
+	unsigned char * get_dataptr(){
+		return buf.get_buf_dataptr(block_num);
+	}
 
 public:
-	BlockBuffer(unsigned char *data,struct BufferMetaInfo *meta){
-		this->data_ptr=data;
-		this->meta_ptr=meta;
+	BlockBuffer(/*unsigned char *data,struct BufferMetaInfo *meta*/ int blk_no){
+		//this->data_ptr=data;
+		//this->meta_ptr=meta;
+		this->block_num=blk_no;
 	}
 	struct HeadInfo getheader(){
+		unsigned char* data_ptr=get_dataptr();
 		struct HeadInfo head;
-		head->block_type=*(int *)(this->data_ptr);
-		head->pblock= *(int *)(this->data_ptr + 4);
-		head->lblock= *(int *)(this->data_ptr + 2*4);
-		head->rblock= *(int *)(this->data_ptr + 3*4);
-		head->num_entries= *(int *)(this->data_ptr + 4*4);
+		head.block_type=*(int *)(data_ptr);
+		head.pblock= *(int *)(data_ptr + 4);
+		head.lblock= *(int *)(data_ptr + 2*4);
+		head.rblock= *(int *)(data_ptr + 3*4);
+		head.num_entries= *(int *)(data_ptr + 4*4);
+		head.num_attrs=*(int *)(data_ptr + 5*4);
+		head.num_slots=*(int *)(data_ptr + 6*4);
+
 		return head;
 	}
 	
 	void setheader(struct HeadInfo head){
-		*(struct HeadInfo*(this->data_ptr))=head;
+		unsigned char* data_ptr=get_dataptr();
+		*(struct HeadInfo* (data_ptr))=head;
 		return;
 	}
 
@@ -57,24 +70,32 @@ public:
 
 class RecBuffer : public BlockBuffer{
 public:
-	void getSlotmap(unsigned char *slotmap, int num_of_slots){
-		memcpy(slotmap,this->data_ptr+32,num_of_slots);
+	void getSlotmap(unsigned char *slotmap){
+		unsigned char* data_ptr=get_dataptr();
+		int num_of_slots=*(int* (data_ptr + 6*4));
+		memcpy(slotmap,data_ptr+32,num_of_slots);
 		return;
 	}
 	
-	void setSlotmap(unsigned char *slotmap, int num_of_slots){
-		memcpy(this->data_ptr+32,slotmap,num_of_slots);
+	void setSlotmap(unsigned char *slotmap){
+		unsigned char* data_ptr=get_dataptr();
+		int num_of_slots=*(int*(data_ptr + 6*4));
+		memcpy(data_ptr+32,slotmap,num_of_slots);
 		return;
 	}
 	
-	void getRecord(union Attribute *rec,int slot_num, int num_of_attrib, int num_of_slots){
-		
-		memcpy(void*(this->data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),void*(rec),num_of_attrib*ATTR_SIZE);
+	void getRecord(union Attribute *rec,int slot_num){
+		unsigned char* data_ptr=get_dataptr();
+		int num_of_attrib=*(int* (data_ptr + 5*4));
+		int num_of_slots=*(int* (data_ptr + 6*4));
+		memcpy(void*(data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),void*(rec),num_of_attrib*ATTR_SIZE);
 		return;
 	}
-	void setRecord(union Attribute *rec,int slot_num, int num_of_attrib, int num_of_slots){
-		
-		memcpy(void*(rec),void*(this->data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),num_of_attrib*ATTR_SIZE);
+	void setRecord(union Attribute *rec,int slot_num){
+		unsigned char* data_ptr=get_dataptr();
+		int num_of_attrib=*(int* (data_ptr + 5*4));
+		int num_of_slots=*(int* (data_ptr + 6*4));
+		memcpy(void*(rec),void*(data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),num_of_attrib*ATTR_SIZE);
 		return;
 	}
 
@@ -93,13 +114,15 @@ public:
 
 class IndBuffer : public BlockBuffer{
 public:
-	struct IndexVal getIndexval(int index_num){
+	struct Index getIndexval(int index_num){
+		unsigned char* data_ptr=get_dataptr();
 		struct Index IndexEntry;
-		IndexEntry=*(struct IndexVal* (this->data_ptr + 32 + index_num*36)); 
+		IndexEntry=*(struct Index* (data_ptr + 32 + index_num*36)); 
 		return IndexEntry;
 	}
 	void setIndexval(struct Index IndexEntry,int index_num){
-		*(struct IndexVal* (this->data_ptr + 32 + index_num*36))=IndexEntry; 
+		unsigned char* data_ptr=get_dataptr();
+		*(struct Index* (data_ptr + 32 + index_num*36))=IndexEntry; 
 		return ;
 	}
 	/*
@@ -110,9 +133,10 @@ public:
 	int *getChild(int child_num){
 		return  (this->data_ptr + 1792 + child_num*4);
 	}*/
-}
+};
 
 class Buffer{
+	friend class BlockBuffer;
 private:
 	unsigned char blocks[32][BLOCK_SIZE];
 	struct BufferMetaInfo metainfo[32];
@@ -154,11 +178,11 @@ private:
 		int block_type = *(int *)(&blocks[free_buffer][0]);
 
 		if(block_type==REC){
-			class RecBuffer* newRecBuffer= new RecBuffer(&blocks[FreeBuffer],&metainfo[FreeBuffer]);
-			metainfo[FreeBuffer].blk=newRecBuffer;
+			class RecBuffer* newRecBuffer= new RecBuffer(&blocks[free_buffer],&metainfo[free_buffer]);
+			metainfo[free_buffer].blk=newRecBuffer;
 		}else if(block_type==IND){
-			class IndBuffer* newIndBuffer= new IndBuffer(&blocks[FreeBuffer],&metainfo[FreeBuffer]);
-			metainfo[FreeBuffer].blk=newIndBuffer;
+			class IndBuffer* newIndBuffer= new IndBuffer(&blocks[free_buffer],&metainfo[free_buffer]);
+			metainfo[free_buffer].blk=newIndBuffer;
 		}
 		return free_buffer;
 	}
@@ -169,6 +193,15 @@ private:
 		//// also free metainfo[i].blk;
 		metainfo[i].block_num=-1;
 		return;
+	}
+
+	unsigned char* get_buf_dataptr(int block_num){
+		int buffer_block=getbufferblock(block_num);
+		if(buffer_block==-1){
+			//use replacement algo
+		}else{
+			return &(blocks[buffer_block][0]);
+		}
 	}
 
 	
@@ -281,3 +314,6 @@ public:
 	}
 
 };
+
+
+struct Buffer buf;

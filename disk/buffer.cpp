@@ -1,3 +1,9 @@
+#include<iostream>
+#include <cstring>
+#include "../define/constants.h"
+
+using namespace std;
+
 union Attribute{
 	int ival;
 	float fval;
@@ -33,19 +39,23 @@ struct BufferMetaInfo {
 
 class BlockBuffer{
 protected:
-	//unsigned char *data_ptr;
-	//struct BufferMetaInfo *meta_ptr;
+	
 	int block_num;
-	unsigned char * get_dataptr(){
-		return buf.get_buf_dataptr(block_num);
-	}
+	class Buffer *buff_ptr;
+
+	/* Definition of get_dataptr() is given at the end of Buffer class definition.
+	 * This is done since Buffer class is forward declared and it's
+	 * member function get_buf_dataptr() must be used to get data_ptr.
+	 * This avoids compilation problems.
+	 */
+	unsigned char * get_dataptr();
 
 public:
-	BlockBuffer(/*unsigned char *data,struct BufferMetaInfo *meta*/ int blk_no){
-		//this->data_ptr=data;
-		//this->meta_ptr=meta;
+	BlockBuffer(int blk_no, class Buffer *buff){
 		this->block_num=blk_no;
+		this->buff_ptr=buff;
 	}
+
 	struct HeadInfo getheader(){
 		unsigned char* data_ptr=get_dataptr();
 		struct HeadInfo head;
@@ -62,77 +72,75 @@ public:
 	
 	void setheader(struct HeadInfo head){
 		unsigned char* data_ptr=get_dataptr();
-		*(struct HeadInfo* (data_ptr))=head;
+		*((struct HeadInfo*)(data_ptr))=head;
 		return;
 	}
+
+	/* Making destructor virtual to allow dynamic_cast.
+	 * Refer to following link for more info:
+	 * https://stackoverflow.com/questions/15114093/getting-source-type-is-not-polymorphic-when-trying-to-use-dynamic-cast
+	 */
+	virtual ~BlockBuffer() {}
 
 };
 
 class RecBuffer : public BlockBuffer{
 public:
-	void getSlotmap(unsigned char *slotmap){
+	RecBuffer(int blk_no, class Buffer *buff) : BlockBuffer(blk_no, buff){
+
+	}
+
+	void getSlotmap(unsigned char *slotmap){ //Assumes sufficient space is allocated
 		unsigned char* data_ptr=get_dataptr();
-		int num_of_slots=*(int* (data_ptr + 6*4));
+		int num_of_slots=*((int*) (data_ptr + 6*4));
 		memcpy(slotmap,data_ptr+32,num_of_slots);
 		return;
 	}
 	
 	void setSlotmap(unsigned char *slotmap){
 		unsigned char* data_ptr=get_dataptr();
-		int num_of_slots=*(int*(data_ptr + 6*4));
+		int num_of_slots=*((int*)(data_ptr + 6*4));
 		memcpy(data_ptr+32,slotmap,num_of_slots);
 		return;
 	}
 	
-	void getRecord(union Attribute *rec,int slot_num){
+	void getRecord(union Attribute *rec,int slot_num){ //Assumes enough memory is allocated.
 		unsigned char* data_ptr=get_dataptr();
-		int num_of_attrib=*(int* (data_ptr + 5*4));
-		int num_of_slots=*(int* (data_ptr + 6*4));
-		memcpy(void*(data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),void*(rec),num_of_attrib*ATTR_SIZE);
-		return;
-	}
-	void setRecord(union Attribute *rec,int slot_num){
-		unsigned char* data_ptr=get_dataptr();
-		int num_of_attrib=*(int* (data_ptr + 5*4));
-		int num_of_slots=*(int* (data_ptr + 6*4));
-		memcpy(void*(rec),void*(data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),num_of_attrib*ATTR_SIZE);
+		int num_of_attrib=*((int*) (data_ptr + 5*4));
+		int num_of_slots=*((int*) (data_ptr + 6*4));
+		memcpy((void*)(data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),(void*)rec,num_of_attrib*ATTR_SIZE);
 		return;
 	}
 
-	/*union Attribute getAttribute(int slot_num, int num_of_attrib, int num_of_slots, int attr_offset){
-		union Attribute attr;
-		attr=*(union Attribute* (this->data_ptr + 32 + num_of_slots + (slot_num*num_of_attrib + attr_offset)*ATTR_SIZE ));
-		return attr;
-		//return union Attribute* (this->data_ptr + 32 + num_of_slots + (slot_num*num_of_attrib + attr_offset)*ATTR_SIZE );
-	}
-	void setAttribute(union Attribute attr,int slot_num, int num_of_attrib, int num_of_slots, int attr_offset){
-		*(union Attribute* (this->data_ptr + 32 + num_of_slots + (slot_num*num_of_attrib + attr_offset)*ATTR_SIZE ))=attr;
+	void setRecord(union Attribute *rec,int slot_num){
+		unsigned char* data_ptr=get_dataptr();
+		int num_of_attrib=*((int*) (data_ptr + 5*4));
+		int num_of_slots=*((int*) (data_ptr + 6*4));
+		memcpy((void*)rec,(void*)(data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),num_of_attrib*ATTR_SIZE);
 		return;
-	}*/
+	}
 
 };
 
 class IndBuffer : public BlockBuffer{
 public:
+	IndBuffer(int blk_no, class Buffer *buff) : BlockBuffer(blk_no, buff){
+
+	}
+
 	struct Index getIndexval(int index_num){
 		unsigned char* data_ptr=get_dataptr();
 		struct Index IndexEntry;
-		IndexEntry=*(struct Index* (data_ptr + 32 + index_num*36)); 
+		IndexEntry=*((struct Index*) (data_ptr + 32 + index_num*36)); 
 		return IndexEntry;
 	}
+
 	void setIndexval(struct Index IndexEntry,int index_num){
 		unsigned char* data_ptr=get_dataptr();
-		*(struct Index* (data_ptr + 32 + index_num*36))=IndexEntry; 
+		*((struct Index*) (data_ptr + 32 + index_num*36))=IndexEntry; 
 		return ;
 	}
-	/*
-	struct Index *getIndex(int index_num){
-		return struct Index* (this->data_ptr + 32 + index_num*32);
-	}
-
-	int *getChild(int child_num){
-		return  (this->data_ptr + 1792 + child_num*4);
-	}*/
+	
 };
 
 class Buffer{
@@ -140,8 +148,12 @@ class Buffer{
 private:
 	unsigned char blocks[32][BLOCK_SIZE];
 	struct BufferMetaInfo metainfo[32];
-	struct OpenRelTable rel_table[8];
 	unsigned char block_alloc_map[DISK_BLOCKS];
+
+	int getBlockType(int buffer_index){
+		int block_type = *(int *)&blocks[buffer_index][0];
+		return block_type;
+	}
 
 	int getFreeBuffer(){
 		int iter;
@@ -166,7 +178,7 @@ private:
 	int load_block(int block){
 		int free_buffer=getFreeBuffer();
 		if(free_buffer==-1){
-			return -1;
+			return -1; /// Buffer replaceent algorithm goes here ////
 		}
 		
 		//////code to copy block from disk to buffer////////////////
@@ -178,16 +190,16 @@ private:
 		int block_type = *(int *)(&blocks[free_buffer][0]);
 
 		if(block_type==REC){
-			class RecBuffer* newRecBuffer= new RecBuffer(&blocks[free_buffer],&metainfo[free_buffer]);
+			class RecBuffer* newRecBuffer= new RecBuffer(block, this);
 			metainfo[free_buffer].blk=newRecBuffer;
 		}else if(block_type==IND){
-			class IndBuffer* newIndBuffer= new IndBuffer(&blocks[free_buffer],&metainfo[free_buffer]);
+			class IndBuffer* newIndBuffer= new IndBuffer(block, this);
 			metainfo[free_buffer].blk=newIndBuffer;
 		}
 		return free_buffer;
 	}
 
-	void releaseBufferBlock(buffer_block){
+	void releaseBufferBlock(int i){
 		metainfo[i].free=true;
 		metainfo[i].dirty=false;
 		//// also free metainfo[i].blk;
@@ -219,14 +231,14 @@ public:
 			return NULL;
 		}else{
 			int FreeBuffer=getFreeBuffer();
-			if(FreeBuffer==-1){///no free buffer found
+			if(FreeBuffer==-1){///no free buffer found -- Replacement must be done
 				return NULL;
 			}
 			*(int *)&blocks[FreeBuffer][0]=REC;
 			metainfo[FreeBuffer].free=false;
 			metainfo[FreeBuffer].dirty=true;
-			metainfo[FreeBuffer].block=iter;
-			class RecBuffer* newRecBuffer= new RecBuffer(&blocks[FreeBuffer],&metainfo[FreeBuffer]);
+			metainfo[FreeBuffer].block_num=iter;
+			class RecBuffer* newRecBuffer= new RecBuffer(iter, this);
 			metainfo[FreeBuffer].blk=newRecBuffer;
 
 			block_alloc_map[iter]=1;
@@ -247,14 +259,14 @@ public:
 			return NULL;
 		}else{
 			int FreeBuffer=getFreeBuffer();
-			if(FreeBuffer==-1){///no free buffer found
+			if(FreeBuffer==-1){///no free buffer found -- Replacement must be done
 				return NULL;
 			}
 			*(int *)&blocks[FreeBuffer][0]=IND;
 			metainfo[FreeBuffer].free=false;
 			metainfo[FreeBuffer].dirty=true;
-			metainfo[FreeBuffer].block=iter;
-			class IndBuffer* newIndBuffer= new IndBuffer(&blocks[FreeBuffer],&metainfo[FreeBuffer]);
+			metainfo[FreeBuffer].block_num=iter;
+			class IndBuffer* newIndBuffer= new IndBuffer(iter, this);
 			metainfo[FreeBuffer].blk=newIndBuffer;
 
 			block_alloc_map[iter]=1;
@@ -271,12 +283,12 @@ public:
 		}
 
 		if(buffer_block!=-1){
-			int blk_type=getBlockType(metainfo[buffer_block].blk);
+			int blk_type=getBlockType(buffer_block);
 			if(blk_type!=REC){
 				return NULL;
 			}
 			return dynamic_cast<RecBuffer*>(metainfo[buffer_block].blk);
-		}else{
+		}else{ //will not be required if replacement is done.
 			return NULL;
 		}
 	}
@@ -289,17 +301,17 @@ public:
 		}
 
 		if(buffer_block!=-1){
-			int blk_type=getBlockType(metainfo[buffer_block].blk);
+			int blk_type=getBlockType(buffer_block);
 			if(blk_type!=IND){
 				return NULL;
 			}
 			return dynamic_cast<IndBuffer*>(metainfo[buffer_block].blk);
-		}else{
+		}else{ //will not be required if replacement is done.
 			return NULL;
 		}
 	}
 
-	void releaseBlock(int block_num){
+	void releaseBlock(int block_num){ //To completely free any block.
 		if(block_num < 0 || block_num >= DISK_BLOCKS){
 			return;  
 		}
@@ -315,5 +327,7 @@ public:
 
 };
 
-
-struct Buffer buf;
+// Member function of BlockBuffer class is defined here
+unsigned char * BlockBuffer::get_dataptr(){
+	return buff_ptr->get_buf_dataptr(block_num);
+}

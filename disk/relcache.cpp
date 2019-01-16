@@ -9,7 +9,7 @@ struct AttributeCache{
 	struct AttributeCache *next;
 };
 
-struct OpenRelTable{
+struct OpenRelTableEntry{
 	char relname[ATTR_SIZE];
 	int num_attr;
 	int num_rec;
@@ -29,37 +29,4 @@ struct OpenRelTable{
 	int getRelId(char relname[ATTR_SIZE]){
 
 	}
-
-	int getNumAttr(int rel_id){
-
-	}
-
-	int getNumRec(int rel_id){
-
-	}
-
-	int getFirstBlk(int rel_id){
-
-	}
-
-	int getNumSlotsBlk(int rel_id){
-
-	}
-
-	struct AttributeCache* getAttrCache(int rel_id){
-
-	}
-
-	void setAttrCache(struct AttributeCache* attr_list){
-
-	}
-
-	void setNumRec(int rel_id, int num_rec){
-
-	}
-
-	void setFirstBlk(int rel_id, int first_blk){
-
-	}
-
 

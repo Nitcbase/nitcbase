@@ -1,5 +1,6 @@
-#include<iostream>
+#include <iostream>
 #include <cstring>
+#include <cstdint>
 #include "../define/constants.h"
 
 using namespace std;
@@ -11,22 +12,22 @@ union Attribute{
 };
 
 struct Index{
-	int lchild;
+	int32_t lchild;
 	union Attribute attrval;
-	int block;
-	int slot;
+	int32_t block;
+	int32_t slot;
 	unsigned char unused[8];
-	int rchild;
+	int32_t rchild;
 };
 
 struct HeadInfo{
-	int block_type;
-	int pblock;
-	int lblock;
-	int rblock;
-	int num_entries;
-	int num_attrs; //not useful for index block
-	int num_slots;
+	int32_t block_type;
+	int32_t pblock;
+	int32_t lblock;
+	int32_t rblock;
+	int32_t num_entries;
+	int32_t num_attrs; //not useful for index block
+	int32_t num_slots;
 	unsigned char reserved[4];
 };
 
@@ -59,13 +60,13 @@ public:
 	struct HeadInfo getheader(){
 		unsigned char* data_ptr=get_dataptr();
 		struct HeadInfo head;
-		head.block_type=*(int *)(data_ptr);
-		head.pblock= *(int *)(data_ptr + 4);
-		head.lblock= *(int *)(data_ptr + 2*4);
-		head.rblock= *(int *)(data_ptr + 3*4);
-		head.num_entries= *(int *)(data_ptr + 4*4);
-		head.num_attrs=*(int *)(data_ptr + 5*4);
-		head.num_slots=*(int *)(data_ptr + 6*4);
+		head.block_type=*(int32_t *)(data_ptr);
+		head.pblock= *(int32_t *)(data_ptr + 4);
+		head.lblock= *(int32_t *)(data_ptr + 2*4);
+		head.rblock= *(int32_t *)(data_ptr + 3*4);
+		head.num_entries= *(int32_t *)(data_ptr + 4*4);
+		head.num_attrs=*(int32_t *)(data_ptr + 5*4);
+		head.num_slots=*(int32_t *)(data_ptr + 6*4);
 
 		return head;
 	}
@@ -92,30 +93,30 @@ public:
 
 	void getSlotmap(unsigned char *slotmap){ //Assumes sufficient space is allocated
 		unsigned char* data_ptr=get_dataptr();
-		int num_of_slots=*((int*) (data_ptr + 6*4));
+		int num_of_slots=*((int32_t*) (data_ptr + 6*4));
 		memcpy(slotmap,data_ptr+32,num_of_slots);
 		return;
 	}
 	
 	void setSlotmap(unsigned char *slotmap){
 		unsigned char* data_ptr=get_dataptr();
-		int num_of_slots=*((int*)(data_ptr + 6*4));
+		int num_of_slots=*((int32_t*)(data_ptr + 6*4));
 		memcpy(data_ptr+32,slotmap,num_of_slots);
 		return;
 	}
 	
 	void getRecord(union Attribute *rec,int slot_num){ //Assumes enough memory is allocated.
 		unsigned char* data_ptr=get_dataptr();
-		int num_of_attrib=*((int*) (data_ptr + 5*4));
-		int num_of_slots=*((int*) (data_ptr + 6*4));
+		int num_of_attrib=*((int32_t*) (data_ptr + 5*4));
+		int num_of_slots=*((int32_t*) (data_ptr + 6*4));
 		memcpy((void*)(data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),(void*)rec,num_of_attrib*ATTR_SIZE);
 		return;
 	}
 
 	void setRecord(union Attribute *rec,int slot_num){
 		unsigned char* data_ptr=get_dataptr();
-		int num_of_attrib=*((int*) (data_ptr + 5*4));
-		int num_of_slots=*((int*) (data_ptr + 6*4));
+		int num_of_attrib=*((int32_t*) (data_ptr + 5*4));
+		int num_of_slots=*((int32_t*) (data_ptr + 6*4));
 		memcpy((void*)rec,(void*)(data_ptr + 32 + num_of_slots +(slot_num*num_of_attrib)*ATTR_SIZE),num_of_attrib*ATTR_SIZE);
 		return;
 	}
@@ -151,7 +152,7 @@ private:
 	unsigned char block_alloc_map[DISK_BLOCKS];
 
 	int getBlockType(int buffer_index){
-		int block_type = *(int *)&blocks[buffer_index][0];
+		int block_type = *(int32_t *)&blocks[buffer_index][0];
 		return block_type;
 	}
 
@@ -187,7 +188,7 @@ private:
 		metainfo[free_buffer].dirty=false;
 		metainfo[free_buffer].block_num=block;
 
-		int block_type = *(int *)(&blocks[free_buffer][0]);
+		int block_type = *(int32_t *)(&blocks[free_buffer][0]);
 
 		if(block_type==REC){
 			class RecBuffer* newRecBuffer= new RecBuffer(block, this);
@@ -234,7 +235,7 @@ public:
 			if(FreeBuffer==-1){///no free buffer found -- Replacement must be done
 				return NULL;
 			}
-			*(int *)&blocks[FreeBuffer][0]=REC;
+			*(int32_t *)&blocks[FreeBuffer][0]=REC;
 			metainfo[FreeBuffer].free=false;
 			metainfo[FreeBuffer].dirty=true;
 			metainfo[FreeBuffer].block_num=iter;
@@ -262,7 +263,7 @@ public:
 			if(FreeBuffer==-1){///no free buffer found -- Replacement must be done
 				return NULL;
 			}
-			*(int *)&blocks[FreeBuffer][0]=IND;
+			*(int32_t *)&blocks[FreeBuffer][0]=IND;
 			metainfo[FreeBuffer].free=false;
 			metainfo[FreeBuffer].dirty=true;
 			metainfo[FreeBuffer].block_num=iter;

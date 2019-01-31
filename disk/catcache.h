@@ -1,3 +1,4 @@
+#include "../define/constants.h"
 
 struct AttributeCache{
 	char rel_name[ATTR_SIZE];
@@ -7,6 +8,8 @@ struct AttributeCache{
 	int root_block;
 	int offset;
 	struct AttributeCache *next;
+	int sblock, sindex; /*IMPORTANT: used for storing state information of any search.
+									 which will be used for getting next hit. */
 };
 
 struct OpenRelTableEntry{
@@ -20,13 +23,7 @@ struct OpenRelTableEntry{
 	int block, slot;
 };
 
+//Still evolving ;-)
+class OpenRelTable{
 
-/*Open Relation table (Relation cache) and attribute cache related functions*/
-	int getFreeRelId(){
-
-	}
-
-	int getRelId(char relname[ATTR_SIZE]){
-
-	}
-
+};

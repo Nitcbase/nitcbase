@@ -11,3 +11,11 @@
 
 #define REC 0
 #define IND 1
+
+#define EQ 101
+#define LE 102
+#define LT 103
+#define GE 104
+#define GT 105
+#define NE 106 //if considered
+#define RST 100 //reset op.

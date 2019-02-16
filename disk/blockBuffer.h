@@ -1,4 +1,5 @@
 #include "../define/constants.h"
+#include <cstdint>
 
 union Attribute{
 	int ival;

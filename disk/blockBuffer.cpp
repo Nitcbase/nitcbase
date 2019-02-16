@@ -37,7 +37,9 @@ unsigned char * BlockBuffer::get_dataptr(){
 	return buff_ptr->get_buf_dataptr(block_num);
 }
 
-BlockBuffer :: ~BlockBuffer() {}
+BlockBuffer :: ~BlockBuffer() {
+	//call buff_ptr->releaseblock(this->block_num);
+}
 
 
 //RecBuffer member functions

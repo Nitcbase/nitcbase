@@ -11,25 +11,26 @@ class Buffer {
 friend class BlockBuffer;
 private:
 	//fields
-	unsigned char blocks[32][BLOCK_SIZE];
-	struct BufferMetaInfo metainfo[32];
-	unsigned char block_alloc_map[DISK_BLOCKS];
+	static unsigned char blocks[32][BLOCK_SIZE];
+	static struct BufferMetaInfo metainfo[32];
+	static unsigned char block_alloc_map[DISK_BLOCKS];
 
 	//methods
-	int getBlockType(int buffer_index);
-	int getFreeBuffer();
-	int getbufferblock(int block);
-	int load_block(int block);
-	void releaseBufferBlock(int i);
-	unsigned char* get_buf_dataptr(int block_num);
+	static int getBlockType(int buffer_index);
+	static int getFreeBuffer();
+	static int getbufferblock(int block);
+	static int load_block(int block);
+	static void releaseBufferBlock(int i);
+	static unsigned char* get_buf_dataptr(int block_num);
 
 public:
 	//methods
-	class RecBuffer *getFreeRecBlock();
-	class IndBuffer *getFreeIndBlock();
-	class RecBuffer *getRecBlock(int block_num);
-	class IndBuffer *getIndBlock(int block_num);
-	void releaseBlock(int block_num);
+	static class RecBuffer *getFreeRecBlock();
+	static class IndBuffer *getFreeIndBlock();
+	static class RecBuffer *getRecBlock(int block_num);
+	static class IndBuffer *getIndBlock(int block_num);
+	static void deleteBlock(int block_num);
+	static void releaseBlock(int block_num);
 };
 
 /* TODO: 

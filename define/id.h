@@ -6,3 +6,8 @@ typedef struct recId{
 	int block;
 	int slot;
 } recId;
+
+typedef struct SearchIndexId{
+	int sblock;
+	int sindex;
+} SearchIndexId;

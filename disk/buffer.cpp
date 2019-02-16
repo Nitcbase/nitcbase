@@ -166,7 +166,24 @@ class IndBuffer * Buffer::getIndBlock(int block_num){
 	}
 }
 
+
 void Buffer::releaseBlock(int block_num){ //To completely free any block.
+	if(block_num < 0 || block_num >= DISK_BLOCKS){
+		return;  
+	}
+
+	int buffer_block=getbufferblock(block_num);
+
+	if(buffer_block!=-1){
+		if(metainfo[buffer_block].dirty){
+		 int write_to_disk=writeblock(block_num, void* (&blocks[buffer_block][0]);
+		}
+		releaseBufferBlock(buffer_block);
+	}
+
+}
+
+void Buffer::deleteBlock(int block_num){ //To completely free any block.
 	if(block_num < 0 || block_num >= DISK_BLOCKS){
 		return;  
 	}

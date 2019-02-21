@@ -7,13 +7,26 @@ union Attribute{
 	char strval[ATTR_SIZE];
 };
 
-struct Index{
+/*struct Index{
 	int32_t lchild;
 	union Attribute attrval;
 	int32_t block;
 	int32_t slot;
 	unsigned char unused[8];
 	int32_t rchild;
+};*/
+
+struct InternalEntry{
+	int32_t lchild;
+	union Attribute attrval;
+	int32_t rchild;
+};
+
+struct Index{
+	union Attribute attrval;
+	int32_t block;
+	int32_t slot;
+	unsigned char unused[8];
 };
 
 struct HeadInfo{
@@ -56,7 +69,18 @@ public:
 class IndBuffer : public BlockBuffer{
 public:
 	IndBuffer(int blk_no, class Buffer *buff);
+};
+
+class IndInternal : public IndBuffer{
+public:
+	IndInternal(int blk_no, class Buffer *buff);
+	struct InternalEntry getInternalEntry(int index_num);
+	void setInternalEntry(struct InternalEntry Entry,int index_num);
+};
+
+class IndLeaf : public IndBuffer{
+public:
+	IndLeaf(int blk_no, class Buffer *buff);
 	struct Index getIndexval(int index_num);
 	void setIndexval(struct Index IndexEntry,int index_num);
 };
-

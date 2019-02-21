@@ -48,17 +48,22 @@ int Buffer::load_block(int block){
 	if(block_type==REC){
 		class RecBuffer* newRecBuffer= new RecBuffer(block, this);
 		metainfo[free_buffer].blk=newRecBuffer;
-	}else if(block_type==IND){
-		class IndBuffer* newIndBuffer= new IndBuffer(block, this);
-		metainfo[free_buffer].blk=newIndBuffer;
-	}
+	}else{
+		if(block_type==INDINT){
+		  class IndBuffer* newIndBuffer= new IndInternal(block, this);
+		  metainfo[free_buffer].blk=newIndBuffer;
+		}else if(block_type==INDLEAF){
+		  class IndBuffer* newIndBuffer= new IndLeaf(block, this);
+		  metainfo[free_buffer].blk=newIndBuffer;
+		}
+	} 
 	return free_buffer;
 }
 
 void Buffer::releaseBufferBlock(int i){
 	metainfo[i].free=true;
 	metainfo[i].dirty=false;
-	//// also free metainfo[i].blk;
+	/// also free metainfo[i].blk;/// also free metainfo[i].blk;metainfo[i].blk=NULL;
 	metainfo[i].block_num=-1;
 	return;
 }
@@ -167,7 +172,7 @@ class IndBuffer * Buffer::getIndBlock(int block_num){
 }
 
 
-void Buffer::releaseBlock(int block_num){ //To completely free any block.
+void Buffer::releaseBlock(int block_num){ //To release and commit to disk.
 	if(block_num < 0 || block_num >= DISK_BLOCKS){
 		return;  
 	}

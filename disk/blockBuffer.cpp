@@ -80,15 +80,32 @@ void RecBuffer::setRecord(union Attribute *rec,int slot_num){
 
 IndBuffer::IndBuffer(int blk_no, class Buffer *buff) : BlockBuffer(blk_no, buff){}
 
-struct Index IndBuffer::getIndexval(int index_num){
+IndInternal::IndInternal(int blk_no, class Buffer *buff) : IndBuffer(blk_no, buff){}
+IndLeaf::IndLeaf(int blk_no, class Buffer *buff) : IndBuffer(blk_no, buff){}
+
+
+struct InternalEntry IndInternal::getInternalEntry(int index_num){
+	unsigned char* data_ptr=get_dataptr();
+	struct InternalEntry Entry;
+	Entry=*((struct InternalEntry*) (data_ptr + 32 + index_num*24)); 
+	return Entry;
+}
+
+void IndInternal::setInternalEntry(struct InternalEntry Entry,int index_num){
+	unsigned char* data_ptr=get_dataptr();
+	*((struct InternalEntry*) (data_ptr + 32 + index_num*24))=Entry; 
+	return ;
+}
+
+struct Index IndLeaf::getIndexval(int index_num){
 	unsigned char* data_ptr=get_dataptr();
 	struct Index IndexEntry;
-	IndexEntry=*((struct Index*) (data_ptr + 32 + index_num*36)); 
+	IndexEntry=*((struct Index*) (data_ptr + 32 + index_num*32)); 
 	return IndexEntry;
 }
 
-void IndBuffer::setIndexval(struct Index IndexEntry,int index_num){
+void IndLeaf::setIndexval(struct Index IndexEntry,int index_num){
 	unsigned char* data_ptr=get_dataptr();
-	*((struct Index*) (data_ptr + 32 + index_num*36))=IndexEntry; 
+	*((struct IndexLeaf*) (data_ptr + 32 + index_num*32))=IndexEntry; 
 	return ;
 }

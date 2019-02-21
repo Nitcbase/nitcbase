@@ -43,11 +43,10 @@ struct HeadInfo{
 class BlockBuffer{
 protected:
 	int block_num;
-	class Buffer *buff_ptr; //May remove this based on decision taken.
 	unsigned char * get_dataptr();
 
 public:
-	BlockBuffer(int blk_no, class Buffer *buff); //Arg2 will be removed.
+	BlockBuffer(int blk_no); //Arg2 will be removed.
 	struct HeadInfo getheader();
 	void setheader(struct HeadInfo head); //better to change return type to int for indicating errors(if any)
 	/* Making destructor virtual to allow dynamic_cast.
@@ -59,7 +58,7 @@ public:
 
 class RecBuffer : public BlockBuffer{
 public:
-	RecBuffer(int blk_no, class Buffer *buff);
+	RecBuffer(int blk_no);
 	void getSlotmap(unsigned char *slotmap); //change return type to to int = slotmapsize
 	void setSlotmap(unsigned char *slotmap);
 	void getRecord(union Attribute *rec,int slot_num);
@@ -68,19 +67,19 @@ public:
 
 class IndBuffer : public BlockBuffer{
 public:
-	IndBuffer(int blk_no, class Buffer *buff);
+	IndBuffer(int blk_no);
 };
 
 class IndInternal : public IndBuffer{
 public:
-	IndInternal(int blk_no, class Buffer *buff);
+	IndInternal(int blk_no);
 	struct InternalEntry getInternalEntry(int index_num);
 	void setInternalEntry(struct InternalEntry Entry,int index_num);
 };
 
 class IndLeaf : public IndBuffer{
 public:
-	IndLeaf(int blk_no, class Buffer *buff);
+	IndLeaf(int blk_no);
 	struct Index getIndexval(int index_num);
 	void setIndexval(struct Index IndexEntry,int index_num);
 };

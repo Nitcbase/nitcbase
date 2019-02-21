@@ -8,9 +8,9 @@
 
 //BlockBuffer member functions
 
-BlockBuffer::BlockBuffer(int blk_no, class Buffer *buff){
+BlockBuffer::BlockBuffer(int blk_no){
 	this->block_num=blk_no;
-	this->buff_ptr=buff;
+	//this->buff_ptr=buff;
 }
 
 struct HeadInfo BlockBuffer::getheader(){
@@ -34,7 +34,7 @@ void BlockBuffer::setheader(struct HeadInfo head){
 }
 
 unsigned char * BlockBuffer::get_dataptr(){
-	return buff_ptr->get_buf_dataptr(block_num);
+	return Buffer::get_buf_dataptr(block_num);
 }
 
 BlockBuffer :: ~BlockBuffer() {
@@ -44,7 +44,7 @@ BlockBuffer :: ~BlockBuffer() {
 
 //RecBuffer member functions
 
-RecBuffer::RecBuffer(int blk_no, class Buffer *buff) : BlockBuffer(blk_no, buff){}
+RecBuffer::RecBuffer(int blk_no) : BlockBuffer(blk_no){}
 
 void RecBuffer::getSlotmap(unsigned char *slotmap){ //Assumes sufficient space is allocated
 	unsigned char* data_ptr=get_dataptr();
@@ -78,10 +78,10 @@ void RecBuffer::setRecord(union Attribute *rec,int slot_num){
 
 //IndBuffer member functions
 
-IndBuffer::IndBuffer(int blk_no, class Buffer *buff) : BlockBuffer(blk_no, buff){}
+IndBuffer::IndBuffer(int blk_no) : BlockBuffer(blk_no, buff){}
 
-IndInternal::IndInternal(int blk_no, class Buffer *buff) : IndBuffer(blk_no, buff){}
-IndLeaf::IndLeaf(int blk_no, class Buffer *buff) : IndBuffer(blk_no, buff){}
+IndInternal::IndInternal(int blk_no) : IndBuffer(blk_no, buff){}
+IndLeaf::IndLeaf(int blk_no) : IndBuffer(blk_no, buff){}
 
 
 struct InternalEntry IndInternal::getInternalEntry(int index_num){

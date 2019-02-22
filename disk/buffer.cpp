@@ -107,7 +107,7 @@ class RecBuffer * Buffer::getFreeRecBlock(){
 	}
 }
 
-class IndBuffer * Buffer::getFreeIndBlock(){
+class IndInternal * Buffer::getFreeIndInternal(){
 	int iter;
 	for(iter=4;iter<DISK_BLOCKS;iter++){
 		if(block_alloc_map[iter]==0){
@@ -126,7 +126,35 @@ class IndBuffer * Buffer::getFreeIndBlock(){
 		metainfo[FreeBuffer].free=false;
 		metainfo[FreeBuffer].dirty=true;
 		metainfo[FreeBuffer].block_num=iter;
-		class IndBuffer* newIndBuffer= new IndBuffer(iter, this);
+		class IndInternal* newIndBuffer= new IndInternal(iter, this);
+		metainfo[FreeBuffer].blk=newIndBuffer;
+
+		block_alloc_map[iter]=1;
+
+		return newIndBuffer;
+	}
+}
+
+class IndLeaf * Buffer::getFreeIndLeaf(){
+	int iter;
+	for(iter=4;iter<DISK_BLOCKS;iter++){
+		if(block_alloc_map[iter]==0){
+			break;
+		}
+	}
+
+	if(iter == DISK_BLOCKS){
+		return NULL;
+	}else{
+		int FreeBuffer=getFreeBuffer();
+		if(FreeBuffer==-1){///no free buffer found -- Replacement must be done
+			return NULL;
+		}
+		*(int32_t *)&blocks[FreeBuffer][0]=IND;
+		metainfo[FreeBuffer].free=false;
+		metainfo[FreeBuffer].dirty=true;
+		metainfo[FreeBuffer].block_num=iter;
+		class IndLeaf* newIndBuffer= new IndLeaf(iter, this);
 		metainfo[FreeBuffer].blk=newIndBuffer;
 
 		block_alloc_map[iter]=1;

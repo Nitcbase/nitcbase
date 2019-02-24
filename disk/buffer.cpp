@@ -31,7 +31,7 @@ int Buffer::getbufferblock(int block){
 	return -1; //disk 'block' is not found in buffer
 }
 
-int Buffer::load_block(int block){
+int Buffer::loadBlock(int block_num){
 	int free_buffer=getFreeBuffer();
 	if(free_buffer==-1){
 		return -1; /// Buffer replaceent algorithm goes here ////
@@ -41,7 +41,7 @@ int Buffer::load_block(int block){
 
 	metainfo[free_buffer].free=false;
 	metainfo[free_buffer].dirty=false;
-	metainfo[free_buffer].block_num=block;
+	metainfo[free_buffer].block_num=block_num;
 
 	int block_type = *(int32_t *)(&blocks[free_buffer][0]);
 
@@ -60,11 +60,11 @@ int Buffer::load_block(int block){
 	return free_buffer;
 }
 
-void Buffer::releaseBufferBlock(int i){
-	metainfo[i].free=true;
-	metainfo[i].dirty=false;
+void Buffer::releaseBufferBlock(int buffer_index){
+	metainfo[buffer_index].free=true;
+	metainfo[buffer_index].dirty=false;
 	/// also free metainfo[i].blk;/// also free metainfo[i].blk;metainfo[i].blk=NULL;
-	metainfo[i].block_num=-1;
+	metainfo[buffer_index].block_num=-1;
 	return;
 }
 

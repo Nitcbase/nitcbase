@@ -46,7 +46,7 @@ protected:
 	unsigned char * get_dataptr();
 
 public:
-	BlockBuffer(int blk_no); //Arg2 will be removed.
+	BlockBuffer(int block_num); //Arg2 will be removed.
 	struct HeadInfo getheader();
 	void setheader(struct HeadInfo head); //better to change return type to int for indicating errors(if any)
 	/* Making destructor virtual to allow dynamic_cast.

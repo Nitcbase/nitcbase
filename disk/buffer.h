@@ -4,7 +4,6 @@ struct BufferMetaInfo {
 	bool free;
 	bool dirty;
 	int block_num;
-	class BlockBuffer *blk;	//May remove this.
 };
 
 class Buffer {
@@ -18,9 +17,9 @@ private:
 	//methods
 	static int getBlockType(int buffer_index);
 	static int getFreeBuffer();
-	static int getbufferblock(int block);
-	static int load_block(int block);
-	static void releaseBufferBlock(int i);
+	static int getbufferblock(int block_num);
+	static int loadBlock(int block_num);
+	static void releaseBufferBlock(int buffer_index);
 	static unsigned char* get_buf_dataptr(int block_num);
 
 public:

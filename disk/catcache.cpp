@@ -5,20 +5,37 @@
 #include <cstdlib>
 
 relId OpenRelTable::getFreeOpenRelTableEntry(){
-	for(relId rel_id=0; rel_id<8; rel_id++){
-		if(RelCache[rel_id].free){
+	for(relId rel_id=0; rel_id < MAXOPEN; rel_id++){
+		if(rel_table[rel_id].free){
 			return rel_id;
 		}
 	}
 	return FAILURE;
 }
 
-relId OpenRelTable::OpenRel(char rel_name[16]){
+relId OpenRelTable::getRelId(char rel_name[ATTR_SIZE]){
+	for(relId rel_id=0; rel_id < MAXOPEN; rel_id++){
+		if(rel_table[rel_id].free){
+			continue;
+		}
+		if(strcmp(rel_table[rel_id].relcat_entry.rel_name,rel_name)== 0){
+			return rel_id;
+		}	
+	}
+	return FAILURE;
+}
+
+relId OpenRelTable::OpenRel(char rel_name[ATTR_SIZE]){
 	int rel_id;
 	RecBuffer *buffer;
 	int block_num= 4,slot_num;	// block num= 4 corresponds to first block of attribute catalog
 	struct HeadInfo header;
 	int num_attrs;
+	
+	rel_id = OpenRelTable::getRelId(rel_name);
+	if(rel_id != FAILURE){
+		return rel_id;
+	}
 	
 	rel_id= getFreeOpenRelTableEntry();
 	if(rel_id== -1){
@@ -27,7 +44,7 @@ relId OpenRelTable::OpenRel(char rel_name[16]){
 	
 	while(block_num!=-1){	//getting relation catalog entries into Open Relation Table
 		buffer= Buffer::getRecBlock(block_num);
-		if(buffer= NULL){
+		if(buffer == NULL){
 			return FAILURE;
 		}
 		
@@ -49,14 +66,14 @@ relId OpenRelTable::OpenRel(char rel_name[16]){
 		delete buffer;	//releasing buffer block
 		//buffer.releaseBlock(block_num);
 		if(slot_num< header.num_slots){	//updatinng cache entries with relation catalog entries
-			strcpy(RelCache[rel_id].relcat_entry.rel_name,rel_name);
-			RelCache[rel_id].relcat_entry.num_attr= rec[1].ival;
-			RelCache[rel_id].relcat_entry.num_rec= rec[2].ival;
-			RelCache[rel_id].relcat_entry.first_blk= rec[3].ival;
-			RelCache[rel_id].relcat_entry.num_slots_blk= rec[4].ival;
-			RelCache[rel_id].rec_id.block= block_num;
-			RelCache[rel_id].rec_id.slot= slot_num;
-			RelCache[rel_id].attr_list_head= NULL;
+			strcpy(rel_table[rel_id].relcat_entry.rel_name,rel_name);
+			rel_table[rel_id].relcat_entry.num_attr= rec[1].ival;
+			rel_table[rel_id].relcat_entry.num_rec= rec[2].ival;
+			rel_table[rel_id].relcat_entry.first_blk= rec[3].ival;
+			rel_table[rel_id].relcat_entry.num_slots_blk= rec[4].ival;
+			rel_table[rel_id].rec_id.block= block_num;
+			rel_table[rel_id].rec_id.slot= slot_num;
+			rel_table[rel_id].attr_list_head= NULL;
 			break;
 		}
 		block_num= header.rblock;
@@ -65,12 +82,12 @@ relId OpenRelTable::OpenRel(char rel_name[16]){
 	if(block_num== -1){
 		return FAILURE;
 	}
-	num_attrs= RelCache[rel_id].relcat_entry.num_attr;
+	num_attrs= rel_table[rel_id].relcat_entry.num_attr;
 	block_num= 5;	//first block of attribute catalog
 	
 	while(num_attrs> 0){
 		buffer= Buffer::getRecBlock(block_num);
-		if(buffer= NULL){
+		if(buffer== NULL){
 			return FAILURE;
 		}
 		
@@ -96,12 +113,11 @@ relId OpenRelTable::OpenRel(char rel_name[16]){
 				temp->attrcat_entry.offset= rec[5].ival;	
 				temp->sid.sblock= -1;
 				temp->sid.sindex= -1;
-				temp->free= true;
 				temp->dirty= false;
 				temp->rec_id.block= block_num;
 				temp->rec_id.slot= slot_num;
-				temp->next= RelCache[rel_id].attr_list_head;
-				RelCache[rel_id].attr_list_head= temp;
+				temp->next= rel_table[rel_id].attr_list_head;
+				rel_table[rel_id].attr_list_head= temp;
 			}
 			if(num_attrs== 0){
 					break;
@@ -112,17 +128,17 @@ relId OpenRelTable::OpenRel(char rel_name[16]){
 		//buffer.releaseBlock(block_num);
 		block_num= header.rblock;
 	}
-	RelCache[rel_id].free= false;	
+	rel_table[rel_id].free= false;	
 	return rel_id;
 }
 
 int OpenRelTable::CloseRel(relId rel_id){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
 		return FAILURE;
 	}
 	RecBuffer *buffer;
 	AttributeCache *head,*temp;
-	head= RelCache[rel_id].attr_list_head;
+	head= rel_table[rel_id].attr_list_head;
 	int block_num,slot_num;
 	
 	while(head){	//free the attribute catalog entries from Open Relation Table
@@ -147,55 +163,55 @@ int OpenRelTable::CloseRel(relId rel_id){
 		head= temp;
 	}
 	
-	RelCache[rel_id].attr_list_head= NULL;
+	rel_table[rel_id].attr_list_head= NULL;
 	
-	if(RelCache[rel_id].dirty){	//commit the relation catalog entry if it is modified(dirty)
-		block_num= RelCache[rel_id].rec_id.block;
-		slot_num= RelCache[rel_id].rec_id.slot;
+	if(rel_table[rel_id].dirty){	//commit the relation catalog entry if it is modified(dirty)
+		block_num= rel_table[rel_id].rec_id.block;
+		slot_num= rel_table[rel_id].rec_id.slot;
 		union Attribute rec[5];
 		buffer= Buffer::getRecBlock(block_num);
 		
-		strcpy(rec[0].strval, RelCache[rel_id].relcat_entry.rel_name);
-		rec[1].ival= RelCache[rel_id].relcat_entry.num_attr;
-		rec[2].ival= RelCache[rel_id].relcat_entry.num_rec;
-		rec[3].ival= RelCache[rel_id].relcat_entry.first_blk;
-		rec[4].ival= RelCache[rel_id].relcat_entry.num_slots_blk;
+		strcpy(rec[0].strval, rel_table[rel_id].relcat_entry.rel_name);
+		rec[1].ival= rel_table[rel_id].relcat_entry.num_attr;
+		rec[2].ival= rel_table[rel_id].relcat_entry.num_rec;
+		rec[3].ival= rel_table[rel_id].relcat_entry.first_blk;
+		rec[4].ival= rel_table[rel_id].relcat_entry.num_slots_blk;
 		
 		buffer->setRecord(rec, slot_num);
 		delete buffer;	
 	}
 	
-	RelCache[rel_id].free= true;
-	RelCache[rel_id].dirty= false;
+	rel_table[rel_id].free= true;
+	rel_table[rel_id].dirty= false;
 	return SUCCESS;
 }
 
-int OpenRelTable::getRelCatEntry(relId rel_id, RelCatEntry relcat_rec){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
+int OpenRelTable::getRelCatEntry(relId rel_id, RelCatEntry *relcat_buf){
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
 		return FAILURE;
 	}
-	relcat_rec= RelCache[rel_id].relcat_entry;
+	*relcat_buf= rel_table[rel_id].relcat_entry;
 	return SUCCESS;
 }	
 	
-int OpenRelTable::setRelCatEntry(relId rel_id, RelCatEntry relcat_rec){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
+int OpenRelTable::setRelCatEntry(relId rel_id, RelCatEntry *relcat_buf){
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
 		return FAILURE;
 	}
-	RelCache[rel_id].relcat_entry= relcat_rec;
-	RelCache[rel_id].dirty= true;
+	rel_table[rel_id].relcat_entry= *relcat_buf;
+	rel_table[rel_id].dirty= true;
 	return SUCCESS;
 }
 
-int OpenRelTable::getAttrCatEntry(relId rel_id, char attr_name[16], AttrCatEntry attrcat_rec){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
+int OpenRelTable::getAttrCatEntry(relId rel_id, char attr_name[ATTR_SIZE], AttrCatEntry *attrcat_buf){
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
 		return FAILURE;
 	}
 	AttributeCache *head;
-	head= RelCache[rel_id].attr_list_head;
+	head= rel_table[rel_id].attr_list_head;
 	while(head){
 		if(strcmp(head->attrcat_entry.attr_name,attr_name)== 0){
-			attrcat_rec= head->attrcat_entry;
+			*attrcat_buf= head->attrcat_entry;
 			return SUCCESS;
 		}
 		head= head->next;
@@ -203,15 +219,15 @@ int OpenRelTable::getAttrCatEntry(relId rel_id, char attr_name[16], AttrCatEntry
 	return FAILURE;
 }
 
-int OpenRelTable::getAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry attrcat_rec){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
+int OpenRelTable::getAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry *attrcat_buf){
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
 		return FAILURE;
 	}
 	AttributeCache *head;
-	head= RelCache[rel_id].attr_list_head;
+	head= rel_table[rel_id].attr_list_head;
 	while(head){
 		if(head->attrcat_entry.offset== attr_offset){
-			attrcat_rec= head->attrcat_entry;
+			*attrcat_buf= head->attrcat_entry;
 			return SUCCESS;
 		}
 		head= head->next;
@@ -219,15 +235,15 @@ int OpenRelTable::getAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry at
 	return FAILURE;
 }
 
-int OpenRelTable::setAttrCatEntry(relId rel_id, char attr_name[16], AttrCatEntry attrcat_rec){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
+int OpenRelTable::setAttrCatEntry(relId rel_id, char attr_name[ATTR_SIZE], AttrCatEntry *attrcat_buf){
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
 		return FAILURE;
 	}
 	AttributeCache *head;
-	head= RelCache[rel_id].attr_list_head;
+	head= rel_table[rel_id].attr_list_head;
 	while(head){
 		if(strcmp(head->attrcat_entry.attr_name,attr_name)== 0){
-			head->attrcat_entry= attrcat_rec;
+			head->attrcat_entry= *attrcat_buf;
 			head->dirty= true;
 			return SUCCESS;
 		}
@@ -236,15 +252,15 @@ int OpenRelTable::setAttrCatEntry(relId rel_id, char attr_name[16], AttrCatEntry
 	return FAILURE;
 }
 
-int OpenRelTable::setAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry attrcat_rec){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
+int OpenRelTable::setAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry *attrcat_buf){
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
 		return FAILURE;
 	}
 	AttributeCache *head;
-	head= RelCache[rel_id].attr_list_head;
+	head= rel_table[rel_id].attr_list_head;
 	while(head){
 		if(head->attrcat_entry.offset== attr_offset){
-			head->attrcat_entry= attrcat_rec;
+			head->attrcat_entry= *attrcat_buf;
 			head->dirty= true;
 			return 	SUCCESS;
 		}
@@ -253,44 +269,50 @@ int OpenRelTable::setAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry at
 	return FAILURE;
 }
 
-int OpenRelTable::getSearchIndexId(relId rel_id, char attr_name[16], SearchIndexId sid){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
-		return FAILURE;
+SearchIndexId OpenRelTable::getSearchIndexId(relId rel_id, char attr_name[ATTR_SIZE]){
+	SearchIndexId sid;
+	sid.sblock= -2;
+	sid.sindex= -2;
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
+		return sid;
 	}
 	AttributeCache *head;
-	head= RelCache[rel_id].attr_list_head;
+	head= rel_table[rel_id].attr_list_head;
 	while(head){
 		if(strcmp(head->attrcat_entry.attr_name,attr_name)== 0){
 			sid= head->sid;
-			return SUCCESS;
+			return sid;
 		}
 		head= head->next;
 	}
-	return FAILURE;	
+	return sid;	
 }
 
-int OpenRelTable::getSearchIndexId(relId rel_id, int attr_offset, SearchIndexId sid){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
-		return FAILURE;
+SearchIndexId OpenRelTable::getSearchIndexId(relId rel_id, int attr_offset){
+	SearchIndexId sid;
+	sid.sblock= -2;
+	sid.sindex= -2;
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
+		return sid;
 	}
 	AttributeCache *head;
-	head= RelCache[rel_id].attr_list_head;
+	head= rel_table[rel_id].attr_list_head;
 	while(head){
 		if(head->attrcat_entry.offset== attr_offset){
 			sid= head->sid;
-			return SUCCESS;
+			return sid;
 		}
 		head= head->next;
 	}
-	return FAILURE;
+	return sid;
 }
 
-int OpenRelTable::setSearchIndexId(relId rel_id, char attr_name[16], SearchIndexId sid){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
+int OpenRelTable::setSearchIndexId(relId rel_id, char attr_name[ATTR_SIZE], SearchIndexId sid){
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
 		return FAILURE;
 	}
 	AttributeCache *head;
-	head= RelCache[rel_id].attr_list_head;
+	head= rel_table[rel_id].attr_list_head;
 	while(head){
 		if(strcmp(head->attrcat_entry.attr_name,attr_name)== 0){
 			head->sid= sid;
@@ -302,11 +324,11 @@ int OpenRelTable::setSearchIndexId(relId rel_id, char attr_name[16], SearchIndex
 }
 
 int OpenRelTable::setSearchIndexId(relId rel_id, int attr_offset, SearchIndexId sid){
-	if(rel_id< 0 || rel_id>= 8 || RelCache[rel_id].free){	//check for validity of relation id
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
 		return FAILURE;
 	}
 	AttributeCache *head;
-	head= RelCache[rel_id].attr_list_head;
+	head= rel_table[rel_id].attr_list_head;
 	while(head){
 		if(head->attrcat_entry.offset== attr_offset){
 			head->sid= sid;
@@ -317,14 +339,3 @@ int OpenRelTable::setSearchIndexId(relId rel_id, int attr_offset, SearchIndexId 
 	return FAILURE;
 }
 
-relId OpenRelTable::getRelId(char rel_name[16]){
-	for(relId rel_id=0; rel_id<8; rel_id++){
-		if(RelCache[rel_id].free){
-			continue;
-		}
-		if(strcmp(RelCache[rel_id].relcat_entry.rel_name,rel_name)== 0){
-			return rel_id;
-		}	
-	}
-	return FAILURE;
-}

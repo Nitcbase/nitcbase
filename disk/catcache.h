@@ -20,7 +20,7 @@ typedef struct AttrCatEntry{
 
 typedef struct AttributeCache{
 	AttrCatEntry attrcat_entry;
-	bool free, dirty;
+	bool dirty;
 	recId rec_id;
 	SearchIndexId sid; /*IMPORTANT: used for storing state information of any search.
 									 which will be used for getting next hit. */
@@ -37,23 +37,23 @@ typedef struct OpenRelTableEntry{
 
 class OpenRelTable{
 private:
-	static OpenRelTableEntry RelCache[8];
+	static OpenRelTableEntry rel_table[MAXOPEN];
 	static relId getFreeOpenRelTableEntry();
 	
 public:	
-	static relId OpenRel(char rel_name[16]);
+	static relId OpenRel(char rel_name[ATTR_SIZE]);
 	static int CloseRel(relId rel_id);
-	static int getRelCatEntry(relId rel_id, RelCatEntry relcat_rec);
-	static int setRelCatEntry(relId rel_id, RelCatEntry relcat_rec);
-	static int getAttrCatEntry(relId rel_id, char attr_name[16], AttrCatEntry attrcat_rec);
-	static int getAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry attrcat_rec);
-	static int setAttrCatEntry(relId rel_id, char attr_name[16], AttrCatEntry attrcat_rec);
-	static int setAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry attrcat_rec);
-	static int getSearchIndexId(relId rel_id, char attr_name[16], SearchIndexId sid);
-	static int getSearchIndexId(relId rel_id, int attr_offset, SearchIndexId sid);
-	static int setSearchIndexId(relId rel_id, char attr_name[16], SearchIndexId sid);
+	static int getRelCatEntry(relId rel_id, RelCatEntry *relcat_buf);
+	static int setRelCatEntry(relId rel_id, RelCatEntry *relcat_buf);
+	static int getAttrCatEntry(relId rel_id, char attr_name[ATTR_SIZE], AttrCatEntry *attrcat_buf);
+	static int getAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry *attrcat_buf);
+	static int setAttrCatEntry(relId rel_id, char attr_name[ATTR_SIZE], AttrCatEntry *attrcat_buf);
+	static int setAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry *attrcat_buf);
+	static SearchIndexId getSearchIndexId(relId rel_id, char attr_name[ATTR_SIZE]);
+	static SearchIndexId getSearchIndexId(relId rel_id, int attr_offset);
+	static int setSearchIndexId(relId rel_id, char attr_name[ATTR_SIZE], SearchIndexId sid);
 	static int setSearchIndexId(relId rel_id, int attr_offset, SearchIndexId sid);
-	static relId getRelId(char rel_name[16]);
+	static relId getRelId(char rel_name[ATTR_SIZE]);
 };
 
 /*TODO:

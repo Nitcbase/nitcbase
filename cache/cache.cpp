@@ -1,6 +1,6 @@
 #include "catcache.h"
-#include "buffer.h"
-#include "blockBuffer.h"
+#include "../buffer/buffer.h"
+#include "../buffer/blockBuffer.h"
 #include <cstring>
 #include <cstdlib>
 

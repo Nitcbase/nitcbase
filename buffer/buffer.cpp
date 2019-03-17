@@ -95,6 +95,8 @@ class RecBuffer * Buffer::getFreeRecBlock(){
 			return NULL;
 		}
 		*(int32_t *)&blocks[FreeBuffer][0]=REC;
+		*(int32_t *)&blocks[FreeBuffer][16]=0;
+		
 		metainfo[FreeBuffer].free=false;
 		metainfo[FreeBuffer].dirty=true;
 		metainfo[FreeBuffer].block_num=iter;
@@ -123,6 +125,8 @@ class IndInternal * Buffer::getFreeIndInternal(){
 			return NULL;
 		}
 		*(int32_t *)&blocks[FreeBuffer][0]=IND;
+		*(int32_t *)&blocks[FreeBuffer][16]=0;
+
 		metainfo[FreeBuffer].free=false;
 		metainfo[FreeBuffer].dirty=true;
 		metainfo[FreeBuffer].block_num=iter;
@@ -151,6 +155,8 @@ class IndLeaf * Buffer::getFreeIndLeaf(){
 			return NULL;
 		}
 		*(int32_t *)&blocks[FreeBuffer][0]=IND;
+		*(int32_t *)&blocks[FreeBuffer][16]=0;
+		
 		metainfo[FreeBuffer].free=false;
 		metainfo[FreeBuffer].dirty=true;
 		metainfo[FreeBuffer].block_num=iter;

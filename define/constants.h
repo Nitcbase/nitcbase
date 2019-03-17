@@ -11,7 +11,8 @@
 #define ALLOTED 2
 
 #define REC 0
-#define IND 1
+#define IND_INTERNAL 1
+#define IND_LEAF 2
 
 #define EQ 101
 #define LE 102
@@ -20,3 +21,6 @@
 #define GT 105
 #define NE 106 //if considered
 #define RST 100 //reset op.
+
+#define INT 0
+#define STRING 1

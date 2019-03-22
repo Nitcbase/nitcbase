@@ -2,6 +2,6 @@
 
 #include "../define/id.h"
 
-struct recId linear-search(relId rel_id, ){
+struct recId linear_search(relId relid, char AttrName[ATTR_SIZE], union Attribute AttrVal, int op){
 
 }

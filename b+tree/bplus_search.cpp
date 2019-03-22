@@ -1,5 +1,4 @@
 /* searches the btree and returns recId of next hit */
-// In this prototype version less than , equal to are the only operations supported
 #include "../define/id.h"
 int compare(union Attribute attr1, union Attribute attr2, int AttrType){
 	if(AttrType == STR){//String

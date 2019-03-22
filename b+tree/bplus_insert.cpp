@@ -79,7 +79,9 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
                 head->setIndexval(elem,iter);
             }
 
-            head->setIndexval(indexval.attrval,ind);
+            head->setIndexval(indexval,ind);
+            header.num_entries=nEntries+1;
+            head->setheader(header);
             success=true;
         }else{
             int par_block=header.pblock;
@@ -88,7 +90,7 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
 
             struct Index elem;
             for(iter=0;iter<nEntries;iter++){
-                elem=root_block->getIndexval(iter);
+                elem=head->getIndexval(iter);
                 int compare_val=compareAttr(indexval.attrval,elem.attrval,type_attr);
                 if(compare_val<=1){
                     break;
@@ -100,15 +102,22 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
                 attrs[iter]=attrs[iter-1];
             }
 
-            class IndInternal* new_internalblk=buffer->getFreeIndInternal();
-            struct HeadInfo newblkheader=new_internalblk->getheader();
+            class IndLeaf* new_blk=buffer->getFreeIndInternal();
+            struct HeadInfo newblkheader=new_blk->getheader();
 
             for(iter=0;iter<32;iter++){
                 head->setattrval(attrs[iter],iter);
-                new_internalblk->setattrval(attrs[32+iter],iter);
+                new_blk->setattrval(attrs[32+iter],iter);
             }
             union Attribute new_attrval;
-            memcpy(&new_attrval,&attrs[31],sizeof(union Attribute));
+            new_attrval=attrs[31].attrval;
+            header.num_entries=32;
+            newblkheader.num_entries=32;
+            newblkheader.pblock=par_block;
+            head->setheader(header);
+            new_blk->setheader(newblkheader);
+            int new_blocknum=new_blk->getblocknum();
+            int child_block=head->getblocknum();
 
             while(success==false){
                 if(par_block!=-1){
@@ -117,8 +126,7 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
                     
                     struct InternalEntry internal_entries[parheader.num_entries+1];
                     int iter;
-                    int tar_ind;
-                    int child_block=head->getblocknum();
+                    int tar_ind=parheader.num_entries;
 
                     for(iter=0;iter<parheader.num_entries;iter++){
                         internal_entries[iter]=parblk->getInternalEntry(iter);
@@ -131,7 +139,7 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
                     }
                     internal_entries[tar_ind].attrval=new_attrval;
                     internal_entries[tar_ind].lchild=child_block;
-                    internal_entries[tar_ind].rchild=new_internalblk->getblocknum();
+                    internal_entries[tar_ind].rchild=new_blocknum;
 
                     if(tar_ind!=parheader.num_entries){
                         internal_entries[tar_ind+1].lchild=internal_entries[tar_ind].rchild;
@@ -143,16 +151,31 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
                         }
                         parheader.num_entries=parheader.num_entries+1;
                         parblk->setheader(parheader);
-                        newblkheader.pblock=par_block;
-                        new_internalblk->setheader(newblkheader);
+                        newblkheader.pblock=par_block;  //might have to change this line to load new_blocknum
+                        new_blk->setheader(newblkheader);
                         success=true;
                         //close newblock,childblock,parblock
                     }else{
-                        //close childblk,newinternalblk
+                        //close childblk,newblk
                         //getnewfreeinternalblk
                         //split internalentries array in to parblk and new_internalblk
+                        class IndInternal* new_blk=buffer->getFreeIndInternal();
+                        newblkheader=new_blk->getheader();
+
+                        for(iter=0;iter<50;iter++){
+                            parblk->setattrval(internal_entries[iter],iter);
+                            new_blk->setattrval(internal_entries[51+iter],iter);
+                        }
+                        parheader.num_entries=50;
+                        newblkheader.num_entries=50;
+                        newblkheader.pblock=parheader.pblock;
+                        parblk->setheader(parheader);
+                        new_blk->setheader(newblkheader);
                         //set the pblock of all childs appropriately
-                        //childblk=parblk, parblk=childblk.pblock
+                        child_block=par_block;
+                        par_block=parheader.pblock;
+                        new_attrval=(parblk->getInternalEntry(50)).attrval;
+                        //close parblk
                         
                     }
 
@@ -170,6 +193,6 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
 
         
     }
-
+    // close head
 
 }

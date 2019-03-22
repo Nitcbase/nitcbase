@@ -28,17 +28,18 @@ int bplus_deleteblock(int block_num){
 	header = ind_buffer->getheader();
 	block_type = header.block_type;
 	
-	if(block_type == INDINT){
+	if(block_type == INDINT){	// if block is internal node remove all children before removing it *IMPORTANT *
 		int num_entries;
-		//struct InternalEntry internal_entry;
 		num_entries = header.num_entries;
 		
 		int iter;
-		for(iter = 0;iter < num_entries; iter++){
-			//getting internal_entry -->need to be discussed and sorted out
-			bplus_deleteblock(internal_entry.lchild);
+		struct InternalEntry *internal_entry;
+		for(iter = 0;iter < num_entries; iter++){	// get the internal index block entries
+			if(ind_buffer->getEntry(iter, internal_entry)) == FAILURE)
+				return FAILURE //NOTE BUT SOME INDEX BLOCKS ARE ALREADY DELETED  
+			bplus_deleteblock(internal_entry->lchild);
 		}
-		bplus_deleteblock(internal_entry.rchild);
+		bplus_deleteblock(internal_entry->rchild);
 		Buffer::deleteblock(block_num);
 	}
 	else if(block_type == INDLEAF){

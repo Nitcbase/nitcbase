@@ -28,8 +28,16 @@ int bplus_create(relId relid, char AttrName[ATTR_SIZE]){
 	 	return FAILURE;
 	 	
 	 int root_block;
-	 //getting root block number from buffer and update its corresponding atttribute catalog entry in open relation table
-	 
+	 root_block = leaf_buffer->getBlockNum(); //getting root block number from buffer
+	 if(root_block == -1){
+	 	//error
+	 	return FAILURE;
+	 }
+	 attrcatentry.root_block = root_block;
+	 flag = OpenRelTable::setAttrCatEntry(relid, AttrName, attrcatentry);
+	 if(flag == FAILURE)	//if there is problem in getting attribute catalog entry
+		return FAILURE;
+
 	 int attroffset, attrtype;
 	 attroffset = attrcatentry.offset;
 	 attrtype = attrcatentry.attr_type;
@@ -43,6 +51,7 @@ int bplus_create(relId relid, char AttrName[ATTR_SIZE]){
 	 	
 	 	if(rec_buffer == NULL){	//problem in getting record buffer corresponding to relation
 	 		//call bplus_destroy
+	 		bplus_destroy(relid, AttrName);
 	 		return FAILURE;
 	 	}
 	
@@ -64,11 +73,12 @@ int bplus_create(relId relid, char AttrName[ATTR_SIZE]){
 			attrval = record[attroffset];	//getting attribute value corresponding to attribute name
 			
 			recId recid;
-			recid->block = data_block;
-			recid->slot = iter;
+			recid.block = data_block;
+			recid.slot = iter;
 			//call bplus_insert
+			bplus_insert(relid, AttrName, attrval, recid);
 		}
-		
+		Buffer::releaseBlock(data_block);
 		data_block = header.rblock; //next data block for the relation
 	}
 			

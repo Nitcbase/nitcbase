@@ -9,7 +9,7 @@ int bplus_create(relId relid, char AttrName[ATTR_SIZE]){
 	
 	//Checking already whether an index exists for the atrribute or not
 	if(attrcatentry.root_block != -1){
-	 	return FAILURE; // already index exists for the attribute
+	 	return SUCCESS; // already index exists for the attribute
 	 }
 	 
 	 RelCatEntry *relcatentry;

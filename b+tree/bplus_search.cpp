@@ -1,6 +1,33 @@
 /* searches the btree and returns recId of next hit */
 // In this prototype version less than , equal to are the only operations supported
 #include "../define/id.h"
+int compare(union Attribute attr1, union Attribute attr2, int AttrType){
+	if(AttrType == STR){//String
+		return (strcmp(attr1.strval, attr2.strval));
+	}
+	else if(AttrType == INT){//Interger
+		if(attr1.ival < attr2.ival){
+			return -1;
+		}
+		else if(attr1.ival == attr2.ival){
+			return 0;
+		}
+		else{
+			return 1;
+		}
+	}
+	else if(AttrType == FLOAT){//Float
+		if(attr1.fval < attr2.fval){
+			return -1;
+		}
+		else if(attr1.fval == attr2.fval){
+			return 0;
+		}
+		else{
+			return 1;
+		}
+	}
+}
 
 struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute AttrVal, int op){
 	int flag;
@@ -300,32 +327,4 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 		}
 	}
 	return recid;
-}
-
-int compare(union Attribute attr1, union Attribute attr2, int AttrType){
-	if(AttrType == STR){//String
-		return (strcmp(attr1.strval, attr2.strval));
-	}
-	else if(AttrType == INT){//Interger
-		if(attr1.ival < attr2.ival){
-			return -1;
-		}
-		else if(attr1.ival == attr2.ival){
-			return 0;
-		}
-		else{
-			return 1;
-		}
-	}
-	else if(AttrType == FLOAT){//Float
-		if(attr1.fval < attr2.fval){
-			return -1;
-		}
-		else if(attr1.fval == attr2.fval){
-			return 0;
-		}
-		else{
-			return 1;
-		}
-	}
 }

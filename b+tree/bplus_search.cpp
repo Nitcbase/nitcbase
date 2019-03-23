@@ -29,266 +29,154 @@ int compare(union Attribute attr1, union Attribute attr2, int AttrType){
 }
 
 struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute AttrVal, int op){
-	int flag;
-	int root_block;
-	struct recId recid;
-	recid.block = -1;
-	recid.slot = -1; 
-	
-	//getting attribute catalog entry from open relation table
-	AttrCatEntry *attrcatentry;
-	flag = OpenRelTable::getAttrCatEntry(relid, AttrName, attrcatentry);
-	if(flag == FAILURE)	//if there is problem in getting attribute catalog entry
-		return FAILURE;
-	
-	//Checking already whether an index exists for the atrribute or not
-	root_block = attrcatentry.root_block;
-	if(root_block != -1){
-	 	return FAILURE; // already index exists for the attribute
-	 }
-	 
-	AttrType = attrcatentry.attr_type;
+	recId recid = {-1, -1};
 	SearchIndexId sid;
-	sid = OpenRelTable::getSearchIndexId(relid, AttrName);
-	 
-	IndBuffer *ind_buffer;
+	AttrCatEntry *attrcatentry;
+	int root_block, block_num;
+	int index_num;
+	int num_entries;	// in each index block
 	int block_type;
+	int attr_type;
 	struct HeadInfo header;
-	int num_entries;
-	int block_num, next_block_num;
-	int iter;
-	int cond;
+	struct InternalEntry *internal_entry;
+	struct Index *leaf_entry;
+	IndBuffer *ind_buffer;
+	int flag, cond; //FLAGS
 	
-	if(sid.sblock == -1 && sid.sindex == -1){ //if it is searching for the first for given attrval
-	 	block_num = root_block;
-	 	
-	 	while(block_num != -1){ 
-			ind_buffer = getIndBlock(block_num);
-			if(ind_buffer == NULL)	//problem in accessing block of given block number
-				return FAILURE;
-			
+	OpenRelTable::getAttrCatEntry(relid, AttrName, attrcat_entry);
+	root_block = attrcat_entry->root_block;
+	attr_type = attrcat_entry->attr_type;
+	
+	sid = OpenRelTable::getSearchIndexId(relid, AttrName);
+	if(sid.sblock == -1 && sid.sindex == -1){
+		block_num = root_block;
+		index_num = 0;
+	}
+	else{	// sid is set for leaf nodes only IMPORTANT
+		block_num = sid.sblock;
+		index_num = sid.sindex + 1;
+	}
+	
+	if(block_num == root_block && index_num == 0){ //It is searching for attrval for the first time
+		while(block_num != -1){
+			ind_buffer = Buffer::getIndBuffer(block_num);
 			header = ind_buffer->getheader();
 			block_type = header.block_type;
 			num_entries = header.num_entries;
 			
-			if(block_type == INDINT){// Internal Index Block
-				for(iter = 0; iter < num_entries; iter++){ //Comparing with internal entries
-					struct InternalEntry *internal_entry;
-					if(ind_buffer->getEntry(iter, internal_entry) == FAILURE){
-						Buffer::releaseBlock(block_num);
-						return FAILURE;
-					}
-					union Attribute InterAttrVal = internal_entry->attrval // getting internal attrval 
-					flag = compare(AttrVal, InterAttrVal, AttrType);
-					cond = 0;
-					
-					switch(op){
-						case LT:
-							next_block_num = internal_entry->lchild;
-							cond = 1;
-							break;
-						case LE:
-							next_block_num = internal_entry->lchild;
-							cond = 1;
-							break;
-						case EQ:
-							if(flag <= 0){
-								next_block_num = internal_entry->lchild;
-								cond = 1;
-							}
-							break;
-						case GT:
-							if(flag < 0){
-								next_block_num = internal_entry->lchild;
-								cond = 1;	
-							}
-							break;
-						case GE:
-							if(flag <= 0){
-								next_block_num = internal_entry->lchild;
-								cond = 1;	
-							}
-							break;
-					}
-						
-					if(cond == 1){
-						Buffer::releaseBlock(block_num);
-						block_num = next_block_num;
-						break;
-					}
-					
-					if(iter == num_entries){
-						Buffer::releaseBlock(block_num);
-						block_num = internal_entry->lchild; // go to right child if attrval is greater than
-															// all attribute values of internal node
-					}				
-				}
+			if(block_type == IND_LEAF){
+				Buffer::releaseBlock(block_num);
+				break;
 			}
-			else if(block_type == INDLEAF){ //Leaf Index Block
-				for(iter = 0; iter < num_entries; iter++){ //Comparing with internal entries
-					struct Index *leaf_entry;
-					if(ind_buffer->getEntry(iter, leaf_entry) == FAILURE){
-						Buffer::releaseBlock(block_num);
-						return FAILURE;
-					}
-					union Attribute LeafAttrVal = leaf_entry->attrval // getting leaf attrval 
-					flag = compare(AttrVal, LeafAttrVal, AttrType);
-					cond = 0;
-					
-					switch(op){
-						case LT:
-						if(flag < 0){
-								cond = 1;	
-							}
-							else{
-								cond = -1; 
-							}
-							break;
-						case LE:
-							if(flag <= 0){
-								cond = 1;	
-							}
-							else{
-								cond = -1;
-							}
-							break;
-						case EQ:
-							if(flag == 0){
-								cond = 1;
-							}
-							else if(flag > 0){
-								cond = -1;
-							}
-							break;
-						case GT:
-							if(flag > 0){
-								cond = 1;
-							}
-							break;
-						case GE:
-							if(flag >= 0){
-								cond = 1;
-							}
-							break;
-					}
-						
-					if(cond == 1){ // setting search index id
-						recid.block = leaf_entry->block; 
-						recid.slot = leaf_entry->slot;
-						sid.sblock = block_num;
-						sid.sindex = iter;
-						OpenRelTable::setSearchIndexId(relid, AttrName, sid);
-						Buffer::releaseBlock(block_num);
+			
+			for(int iter = 0; iter < num_entries, iter++){ 
+				ind_buffer->getEntry(internal_entry, iter);
+				flag = compare(AttrVal, internal_entry->attrval, attr_type);
+			
+				cond = 0;
+				switch(op){
+					case LT:
+						cond = 1;
 						break;
-					}
-					else if(cond == -1){ //attr val greats than index value then attr val cann't be found
-						sid.sblock = -1;
-						sid.sindex = -1;
-						OpenRelTable::setSearchIndexId(relid, AttrName, sid);
-						Buffer::releaseBlock(block_num);
-						return recid;
-					}
+					case LE:
+						cond = 1;
+						break;
+					case EQ:
+						if(flag <= 0){
+							cond = 1;
+						}
+						break;
+					case GT:
+						if(flag < 0){
+							cond = 1;	
+						}
+						break;
+					case GE:
+						if(flag <= 0){
+							cond = 1;	
+						}
+						break;
+				}
+						
+				if(cond == 1){
+					Buffer::releaseBlock(block_num);
+					block_num = internal_entry->lchild;
+					break;
 				}
 					
 				if(iter == num_entries){
-					sid.sblock = -1;
-					sid.sindex = -1;
-					OpenRelTable::setSearchIndexId(relid, AttrName, sid);
 					Buffer::releaseBlock(block_num);
-					return recid;
+					block_num = internal_entry->rchild; // go to right child if attrval is greater than
+														// all attribute values of internal node
 				}
-				block_num = -1;
-					
-			}
-			else{
-				//Error 
 			}
 		}
 	}
-	else{// if attr value already searched sid.sblock != -1 && sid.sindex != -1
-		block_num = sid.sblock;
-		ind_buffer = getIndBlock(block_num);
-		if(ind_buffer == NULL)	//problem in accessing block of given block number
-			return FAILURE;
-		
-		header = ind_buffer->getheader();
-		block_type = header.block_type;
-		num_entries = header.num_entries;
-		
-		if(block_type != INDLEAF){
-			//error
+	
+	//NOTE from here index block is leaf node WHY?
+	
+	ind_buffer = Buffer::getIndBuffer(block_num);
+	header = ind_buffer->getheader();
+	//block_type = header.block_type;  if needed verify that index block is leaf;
+	num_entries = header.num_entries;
+	
+	if(index_num == (num_entries - 1)){ // attrval equals to last index value
+		Buffer::releaseBlock(block_num);
+		block_num = header.rblock; // next leaf child
+		if(block_num == -1){
+			sid.sblock = -1;
+			sid.sindex = -1;
+			OpenRelTable::setSearchIndexId(relid, AttrName, sid);
 			return recid;
 		}
+			
+		ind_buffer = Buffer::getIndBlock(block_num);
+		header = ind_buffer->getheader();
+		//block_type = header.block_type;
+		num_entries = header.num_entries;
+		index_num = 0;
+	}
+	
+	for(iter = index_num; iter < num_entries; iter++){
+		ind_buffer->getEntry(leaf_entry, iter);
+		flag = compare(AttrVal, leaf_entry->attrval, attr_type);
 		
-		if(sid.sindex == (num_entries - 1)){ // attrval equals to last index value
-			Buffer::releaseBlock(block_num);
-			block_num = header.rblock; // next leaf child
-			if(block_num == -1){
-				sid.sblock = -1;
-				sid.sindex = -1;
-				OpenRelTable::setSearchIndexId(relid, AttrName, sid);
-				return recid;
-			}
-			
-			ind_buffer = getIndBlock(block_num);
-			if(ind_buffer == NULL)	//problem in accessing block of given block number
-				return FAILURE;
-				
-			header = ind_buffer->getheader();
-			block_type = header.block_type;
-			num_entries = header.num_entries;
-			sid.sindex = -1;
-			if(block_type != INDLEAF){
-				//error
-				return recid;
-			}
-		}
-			
-		for(iter = sid.sindex+1; iter < num_entries; iter++){
-			struct Index *leaf_entry;
-			if(ind_buffer->getEntry(iter, leaf_entry) == FAILURE){
-				Buffer::releaseBlock(block_num);
-				return FAILURE;
-			}
-			union Attribute LeafAttrVal = leaf_entry->attrval // getting leaf attrval 
-			flag = compare(AttrVal, LeafAttrVal, AttrType);
-			cond = 0;
-						
-			switch(op){
-				case LT:
-					if(flag < 0){								
+		cond = 0;
+		switch(op){
+			case LT:
+				if(flag < 0){
 						cond = 1;	
-					}
-					else{
-						cond = -1; 
-					}
-					break;					
-				case LE:
-					if(flag <= 0){
-						cond = 1;	
-					}
-					else{
-						cond = -1;
-					}
-					break;
-				case EQ:
-					if(flag == 0){
-						cond = 1;
-					}
-					else if(flag > 0){
-							cond = -1;
-					}
-					break;
-				case GT:
-					if(flag > 0){
-						cond = 1;
-					}
-					break;
-				case GE:
-					if(flag >= 0){
-						cond = 1;
-					}
-					break;
+				}
+				else{
+					cond = -1; 
+				}
+				break;
+			case LE:
+				if(flag <= 0){
+					cond = 1;	
+				}
+				else{
+					cond = -1;
+				}
+				break;
+			case EQ:
+				if(flag == 0){
+					cond = 1;
+				}
+				else if(flag > 0){
+					cond = -1;
+				}
+				break;
+			case GT:
+				if(flag > 0){
+					cond = 1;
+				}
+				break;
+			case GE:
+				if(flag >= 0){
+					cond = 1;
+				}
+				break;
 			}
 						
 			if(cond == 1){ // setting search index id
@@ -300,14 +188,17 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 				Buffer::releaseBlock(block_num);
 				break;
 			}
-			else if(cond == -1){
+			else if(cond == -1){ //attr val greats than index value then attr val cann't be found
 				sid.sblock = -1;
 				sid.sindex = -1;
 				OpenRelTable::setSearchIndexId(relid, AttrName, sid);
 				Buffer::releaseBlock(block_num);
-				return recid;
+				break;
 			}
-		}
 	}
+	if(iter == num_entries){ //if condition is not satisfied for all the entries in leaf node
+		Buffer::releaseBlock(block_num);
+	}
+	
 	return recid;
 }

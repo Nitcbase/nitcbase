@@ -123,8 +123,10 @@ struct recId linear_search(relId relid, char AttrName[ATTR_SIZE], union Attribut
 				recid = {block_num, iter};
 				prev_recid = recid;
 				OpenRelTable::setPrevRecId(relid, prev_recid);
+				Buffer::releaseBlock(block_num);
 				return recid;
 			}
+			Buffer::releaseBlock(block_num);
 			block_num = next_block_num;
 			slot_num = 0;
 		}

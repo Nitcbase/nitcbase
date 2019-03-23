@@ -68,18 +68,24 @@ public:
 class IndBuffer : public BlockBuffer{
 public:
 	IndBuffer(int blk_no);
+	virtual int getEntry(void *ptr, int indexnum) =0;
+	virtual int setEntry(void *ptr, int indexnum) =0;
 };
 
 class IndInternal : public IndBuffer{
 public:
 	IndInternal(int blk_no);
-	struct InternalEntry getInternalEntry(int index_num);
-	void setInternalEntry(struct InternalEntry Entry,int index_num);
+	int getEntry(void *ptr, int indexnum) ;
+	int setEntry(void *ptr, int indexnum) ;
+	//struct InternalEntry getInternalEntry(int index_num);
+	//void setInternalEntry(struct InternalEntry Entry,int index_num);
 };
 
 class IndLeaf : public IndBuffer{
 public:
 	IndLeaf(int blk_no);
-	struct Index getIndexval(int index_num);
-	void setIndexval(struct Index IndexEntry,int index_num);
+	int getEntry(void *ptr, int indexnum) ;
+	int setEntry(void *ptr, int indexnum) ;
+	//struct Index getIndexval(int index_num);
+	//void setIndexval(struct Index IndexEntry,int index_num);
 };

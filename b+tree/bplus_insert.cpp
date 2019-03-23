@@ -1,5 +1,7 @@
 /* insert an index into b-tree */
-#include "blockBuffer.h"
+#include "../buffer/blockBuffer.h"
+#include "../buffer/buffer.h"
+#include "../define/id.h"
 #include <cstring>
 
 
@@ -23,28 +25,33 @@ int compareAttr(union Attribute val1,union Attribute val2,int type ){
     }
 }
 
-int bplus_insert(int root_block,struct Index indexval, int type_attr){
+int bplus_insert(int root_block,union Attribute val,recId rec_id, int type_attr){
+    struct Index indexval;
+    indexval.attrval=val;
+    indexval.block=rec_id.block;
+    indexval.slot=rec_id.slot;
     if(root_block==-1){
         return FAILURE;
     }
 
-    class IndBuffer *head=getIndBlock(root_block);
+    class IndBuffer *head=Buffer::getIndBlock(root_block);
     struct HeadInfo header=head->getheader();
 
     if(header.block_type==IND_INTERNAL){
-        //change head to internal ind pointer type
-        
         int nEntries=header.num_entries;
         int child_head;
 
-        struct InternalEntry elem=head->getInternalEntry(0);
+        struct InternalEntry elem;
+        int getter;
+        getter=head->getEntry((void *)(&elem),0);
+        
         int compare_val=compareAttr(indexval.attrval,elem.attrval,type_attr);
         if(compare_val<=1){
             child_head=elem.lchild;
         }else{
             int iter;
             for(iter=1;iter<nEntries;iter++){
-                elem=head->getInternalEntry(iter);
+                getter=head->getEntry((void *)(&elem),iter);
                 int compare_val1=compareAttr(indexval.attrval,elem.attrval,type_attr);
                 if(compare_val1<=1){
                     child_head=elem.lchild;
@@ -56,17 +63,17 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
                 child_head=elem.rchild;
             }
         }
-        bplus_insert(child_head,indexval,type_attr);
+        bplus_insert(child_head,val,rec_id,type_attr);
 
     }else{
-        //change head to ind_leaf
         int nEntries=header.num_entries;
         bool success = false;
+        int getter,setter;
         if(nEntries!=63){
             struct Index elem;
             int iter;
             for(iter=0;iter<nEntries;iter++){
-                elem=root_block->getIndexval(iter);
+                getter=head->getEntry((void *)(&elem),iter);
                 int compare_val=compareAttr(indexval.attrval,elem.attrval,type_attr);
                 if(compare_val<=1){
                     break;
@@ -74,12 +81,11 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
             }
             int ind=iter;
             for(iter=nEntries;iter>ind;iter--){
-                struct Index elem;
-                elem=head->getIndexval(iter-1);
-                head->setIndexval(elem,iter);
+                getter=head->getEntry((void *)(&elem),iter-1);
+                setter=head->setEntry((void *)(&elem),iter);
             }
 
-            head->setIndexval(indexval,ind);
+            setter=head->setEntry((void *)(&indexval),ind);
             header.num_entries=nEntries+1;
             head->setheader(header);
             success=true;
@@ -87,27 +93,29 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
             int par_block=header.pblock;
             struct Index attrs[nEntries+1];
             int iter;
+            int ind;
 
             struct Index elem;
             for(iter=0;iter<nEntries;iter++){
-                elem=head->getIndexval(iter);
+                getter=head->getEntry((void *)(&elem),iter);
                 int compare_val=compareAttr(indexval.attrval,elem.attrval,type_attr);
                 if(compare_val<=1){
-                    break;
+                    ind=iter;
                 }
-                attrs[iter]=head->getIndexval(iter);
+                getter=head->getEntry((void *)(&attrs[iter]),iter);
             }
-            int ind=iter;
+            ind++;
             for(iter=nEntries;iter>ind;iter--){
                 attrs[iter]=attrs[iter-1];
             }
+            attrs[ind]=indexval;
 
-            class IndLeaf* new_blk=buffer->getFreeIndInternal();
+            class IndBuffer* new_blk=Buffer::getFreeIndInternal();
             struct HeadInfo newblkheader=new_blk->getheader();
 
             for(iter=0;iter<32;iter++){
-                head->setattrval(attrs[iter],iter);
-                new_blk->setattrval(attrs[32+iter],iter);
+                getter=head->setEntry((void *)(&attrs[iter]),iter);//head->setattrval(attrs[iter],iter);
+                getter=new_blk->setEntry((void *)(&attrs[iter]),32+iter);//new_blk->setattrval(attrs[32+iter],iter);
             }
             union Attribute new_attrval;
             new_attrval=attrs[31].attrval;
@@ -121,7 +129,7 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
 
             while(success==false){
                 if(par_block!=-1){
-                    class IndBuffer *parblk=getIndBlock(par_block);
+                    class IndBuffer *parblk=Buffer::getIndBlock(par_block);
                     struct HeadInfo parheader=parblk->getheader();
                     
                     struct InternalEntry internal_entries[parheader.num_entries+1];
@@ -129,7 +137,7 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
                     int tar_ind=parheader.num_entries;
 
                     for(iter=0;iter<parheader.num_entries;iter++){
-                        internal_entries[iter]=parblk->getInternalEntry(iter);
+                        getter=head->getEntry((void *)(&internal_entries[iter]),iter);//internal_entries[iter]=parblk->getInternalEntry(iter);
                         if(internal_entries[iter].lchild==child_block){
                             tar_ind=iter;
                         }
@@ -147,24 +155,24 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
 
                     if(parheader.num_entries!=100){
                         for(iter=0;iter<=parheader.num_entries;iter++){
-                            parblk->setInternalEntry(internal_entries[iter],iter);
+                            setter=parblk->setEntry((void *)(&internal_entries[iter]),iter);//parblk->setInternalEntry(internal_entries[iter],iter);
                         }
                         parheader.num_entries=parheader.num_entries+1;
                         parblk->setheader(parheader);
-                        newblkheader.pblock=par_block;  //might have to change this line to load new_blocknum
+                        newblkheader.pblock=par_block;  //might have to change this line to load new_blocknum or even might not need this.
                         new_blk->setheader(newblkheader);
                         success=true;
-                        //close newblock,childblock,parblock
+                        //close parblock, blocks which need to be.
                     }else{
                         //close childblk,newblk
                         //getnewfreeinternalblk
                         //split internalentries array in to parblk and new_internalblk
-                        class IndInternal* new_blk=buffer->getFreeIndInternal();
+                        class IndBuffer* new_blk=Buffer::getFreeIndInternal();
                         newblkheader=new_blk->getheader();
 
                         for(iter=0;iter<50;iter++){
-                            parblk->setattrval(internal_entries[iter],iter);
-                            new_blk->setattrval(internal_entries[51+iter],iter);
+                            setter=parblk->setEntry((void *)(&internal_entries[iter]),iter);//parblk->setattrval(internal_entries[iter],iter);
+                            setter=new_blk->setEntry((void *)(&internal_entries[51+iter]),iter);//new_blk->setattrval(internal_entries[51+iter],iter);
                         }
                         parheader.num_entries=50;
                         newblkheader.num_entries=50;
@@ -174,7 +182,8 @@ int bplus_insert(int root_block,struct Index indexval, int type_attr){
                         //set the pblock of all childs appropriately
                         child_block=par_block;
                         par_block=parheader.pblock;
-                        new_attrval=(parblk->getInternalEntry(50)).attrval;
+                        struct InternalEntry internalval;
+                        new_attrval=internal_entries[50].attrval;
                         //close parblk
                         
                     }

@@ -25,8 +25,8 @@ private:
 public:
 	//methods
 	static class RecBuffer *getFreeRecBlock();
-	static class IndInternal *getFreeIndInternal();
-	static class IndLeaf *getFreeIndLeaf();
+	static class IndBuffer *getFreeIndInternal();
+	static class IndBuffer *getFreeIndLeaf();
 	static class RecBuffer *getRecBlock(int block_num);
 	static class IndBuffer *getIndBlock(int block_num);
 	static void deleteBlock(int block_num);

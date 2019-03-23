@@ -138,8 +138,6 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 					switch(op){
 						case LT:
 						if(flag < 0){
-								recid.block = leaf_entry->block; 
-								recid.slot = leaf_entry->slot;
 								cond = 1;	
 							}
 							else{
@@ -148,8 +146,6 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 							break;
 						case LE:
 							if(flag <= 0){
-								recid.block = leaf_entry->block; 
-								recid.slot = leaf_entry->slot;
 								cond = 1;	
 							}
 							else{
@@ -158,8 +154,6 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 							break;
 						case EQ:
 							if(flag == 0){
-								recid.block = leaf_entry->block; 
-								recid.slot = leaf_entry->slot;
 								cond = 1;
 							}
 							else if(flag > 0){
@@ -168,21 +162,19 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 							break;
 						case GT:
 							if(flag > 0){
-								recid.block = leaf_entry->block; 
-								recid.slot = leaf_entry->slot;
 								cond = 1;
 							}
 							break;
 						case GE:
 							if(flag >= 0){
-								recid.block = leaf_entry->block; 
-								recid.slot = leaf_entry->slot;
 								cond = 1;
 							}
 							break;
 					}
 						
 					if(cond == 1){ // setting search index id
+						recid.block = leaf_entry->block; 
+						recid.slot = leaf_entry->slot;
 						sid.sblock = block_num;
 						sid.sindex = iter;
 						OpenRelTable::setSearchIndexId(relid, AttrName, sid);
@@ -264,9 +256,7 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 						
 			switch(op){
 				case LT:
-					if(flag < 0){
-						recid.block = leaf_entry->block; 
-						recid.slot = leaf_entry->slot;								
+					if(flag < 0){								
 						cond = 1;	
 					}
 					else{
@@ -275,8 +265,6 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 					break;					
 				case LE:
 					if(flag <= 0){
-						recid.block = leaf_entry->block; 
-						recid.slot = leaf_entry->slot;
 						cond = 1;	
 					}
 					else{
@@ -285,8 +273,6 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 					break;
 				case EQ:
 					if(flag == 0){
-						recid.block = leaf_entry->block; 
-						recid.slot = leaf_entry->slot;
 						cond = 1;
 					}
 					else if(flag > 0){
@@ -295,21 +281,19 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 					break;
 				case GT:
 					if(flag > 0){
-						recid.block = leaf_entry->block; 
-						recid.slot = leaf_entry->slot;
 						cond = 1;
 					}
 					break;
 				case GE:
 					if(flag >= 0){
-						recid.block = leaf_entry->block; 
-						recid.slot = leaf_entry->slot;
 						cond = 1;
 					}
 					break;
 			}
 						
 			if(cond == 1){ // setting search index id
+				recid.block = leaf_entry->block; 
+				recid.slot = leaf_entry->slot;
 				sid.sblock = block_num;
 				sid.sindex = iter;
 				OpenRelTable::setSearchIndexId(relid, AttrName, sid);

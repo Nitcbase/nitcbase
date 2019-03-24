@@ -28,7 +28,7 @@ relId OpenRelTable::getRelId(char rel_name[ATTR_SIZE]){
 relId OpenRelTable::OpenRel(char rel_name[ATTR_SIZE]){
 	int rel_id;
 	RecBuffer *buffer;
-	int block_num= 4,slot_num;	// block num= 4 corresponds to first block of attribute catalog
+	int block_num= 4,slot_num;	// block num= 4 corresponds to first block of relation catalog
 	struct HeadInfo header;
 	int num_attrs;
 	
@@ -73,6 +73,8 @@ relId OpenRelTable::OpenRel(char rel_name[ATTR_SIZE]){
 			rel_table[rel_id].relcat_entry.num_slots_blk= rec[4].ival;
 			rel_table[rel_id].rec_id.block= block_num;
 			rel_table[rel_id].rec_id.slot= slot_num;
+			rel_table[rel_id].search_rid.block = -1;
+			rel_table[rel_id].search_rid.slot = -1;
 			rel_table[rel_id].attr_list_head= NULL;
 			break;
 		}
@@ -200,6 +202,22 @@ int OpenRelTable::setRelCatEntry(relId rel_id, RelCatEntry *relcat_buf){
 	}
 	rel_table[rel_id].relcat_entry= *relcat_buf;
 	rel_table[rel_id].dirty= true;
+	return SUCCESS;
+}
+
+recId OpenRelTable::getPrevRecId(relId rel_id){
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
+		recId rid = { -1, -1};
+		return rid;
+	}
+	return rel_table[rel_id].prev_rid;
+}
+
+int OpenRelTable::setPrevRecId(relId rel_id, recId rid){
+	if(rel_id< 0 || rel_id>= MAXOPEN || rel_table[rel_id].free){	//check for validity of relation id
+		return FAILURE;
+	}
+	rel_table[rel_id].prev_rid = rid;
 	return SUCCESS;
 }
 

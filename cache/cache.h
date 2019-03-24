@@ -31,7 +31,7 @@ typedef struct OpenRelTableEntry{
 	RelCatEntry relcat_entry;
 	struct AttributeCache *attr_list_head;
 	bool free, dirty;
-	recId rec_id;
+	recId rec_id, prev_rid;
 }OpenRelTableEntry;
 
 
@@ -45,6 +45,8 @@ public:
 	static int CloseRel(relId rel_id);
 	static int getRelCatEntry(relId rel_id, RelCatEntry *relcat_buf);
 	static int setRelCatEntry(relId rel_id, RelCatEntry *relcat_buf);
+	static recId getPrevRecId(relId rel_id);
+	static int setPrevRecId(relId rel_id, recId rid);
 	static int getAttrCatEntry(relId rel_id, char attr_name[ATTR_SIZE], AttrCatEntry *attrcat_buf);
 	static int getAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry *attrcat_buf);
 	static int setAttrCatEntry(relId rel_id, char attr_name[ATTR_SIZE], AttrCatEntry *attrcat_buf);

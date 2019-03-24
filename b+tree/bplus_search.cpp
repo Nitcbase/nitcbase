@@ -37,6 +37,7 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 	int num_entries;	// in each index block
 	int block_type;
 	int attr_type;
+	int iter;
 	struct HeadInfo header;
 	struct InternalEntry *internal_entry;
 	struct Index *leaf_entry;
@@ -69,7 +70,7 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 				break;
 			}
 			
-			for(int iter = 0; iter < num_entries, iter++){ 
+			for(iter = 0; iter < num_entries, iter++){ 
 				ind_buffer->getEntry(internal_entry, iter);
 				flag = compare(AttrVal, internal_entry->attrval, attr_type);
 			
@@ -120,7 +121,7 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 	//block_type = header.block_type;  if needed verify that index block is leaf;
 	num_entries = header.num_entries;
 	
-	if(index_num == (num_entries - 1)){ // attrval equals to last index value
+	if(index_num == num_entries){ // attrval equals to last index value
 		Buffer::releaseBlock(block_num);
 		block_num = header.rblock; // next leaf child
 		if(block_num == -1){
@@ -185,20 +186,16 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 				sid.sblock = block_num;
 				sid.sindex = iter;
 				OpenRelTable::setSearchIndexId(relid, AttrName, sid);
-				Buffer::releaseBlock(block_num);
 				break;
 			}
 			else if(cond == -1){ //attr val greats than index value then attr val cann't be found
 				sid.sblock = -1;
 				sid.sindex = -1;
 				OpenRelTable::setSearchIndexId(relid, AttrName, sid);
-				Buffer::releaseBlock(block_num);
 				break;
 			}
 	}
-	if(iter == num_entries){ //if condition is not satisfied for all the entries in leaf node
-		Buffer::releaseBlock(block_num);
-	}
+	Buffer::releaseBlock(block_num);
 	
 	return recid;
 }

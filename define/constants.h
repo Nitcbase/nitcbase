@@ -24,3 +24,4 @@
 
 #define INT 0
 #define STRING 1
+#define FLOAT 2

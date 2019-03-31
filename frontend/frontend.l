@@ -39,6 +39,6 @@ exit				{return EXIT;}
 "<="				{return LETK;}
 ">="				{return GETK;}
 "!="				{return NETK;}
-[(),;]				{return *yytext;}
+[(),;\.]			{return *yytext;}
 [ \n\t]				{}
-[a-zA-Z0-9_]+		{return ID;}
+[a-zA-Z0-9_]+		{yylval=getNode(yytext, 0, NULL, NULL); return ID;}

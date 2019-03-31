@@ -15,13 +15,13 @@ int bplus_destroy(int block_num){
 		num_entries = header.num_entries;
 		
 		int iter;
-		struct InternalEntry *internal_entry;
+		struct InternalEntry internal_entry;
 		for(iter = 0;iter < num_entries; iter++){	// get the internal index block entries
-			if(ind_buffer->getEntry(iter, internal_entry)) == FAILURE)
+			if(ind_buffer->getEntry(iter, &internal_entry)) == FAILURE)
 				return FAILURE //NOTE BUT SOME INDEX BLOCKS ARE ALREADY DELETED  
-			bplus_destroy(internal_entry->lchild);
+			bplus_destroy(internal_entry.lchild);
 		}
-		bplus_destroy(internal_entry->rchild);
+		bplus_destroy(internal_entry.rchild);
 		Buffer::deleteblock(block_num);
 	}
 	else if(block_type == INDLEAF){

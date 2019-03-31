@@ -2,8 +2,8 @@ int bplus_create(relId relid, char AttrName[ATTR_SIZE]){
 	int flag;
 	
 	//getting attribute catalog entry from open relation table
-	AttrCatEntry *attrcatentry;
-	flag = OpenRelTable::getAttrCatEntry(relid, AttrName, attrcatentry);
+	AttrCatEntry attrcatentry;
+	flag = OpenRelTable::getAttrCatEntry(relid, AttrName, &attrcatentry);
 	if(flag == FAILURE)	//if there is problem in getting attribute catalog entry
 		return FAILURE;
 	
@@ -12,8 +12,8 @@ int bplus_create(relId relid, char AttrName[ATTR_SIZE]){
 	 	return SUCCESS; // already index exists for the attribute
 	 }
 	 
-	 RelCatEntry *relcatentry;
-	 flag = OpenRelTable::getRelCatEntry(relid, relcatentry);
+	 RelCatEntry relcatentry;
+	 flag = OpenRelTable::getRelCatEntry(relid, &relcatentry);
 	 if(flag == FAILURE) //if there is problem in getting relation catalog entry
 		return FAILURE;
 	 
@@ -34,7 +34,7 @@ int bplus_create(relId relid, char AttrName[ATTR_SIZE]){
 	 	return FAILURE;
 	 }
 	 attrcatentry.root_block = root_block;
-	 flag = OpenRelTable::setAttrCatEntry(relid, AttrName, attrcatentry);
+	 flag = OpenRelTable::setAttrCatEntry(relid, AttrName, &attrcatentry);
 	 if(flag == FAILURE)	//if there is problem in getting attribute catalog entry
 		return FAILURE;
 

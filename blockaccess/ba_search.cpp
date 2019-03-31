@@ -1,15 +1,15 @@
-recId ba_search(relId relid, char AttrName[ATTR_SIZE], union Attribute AttrVal, int op){
+int ba_search(relId relid, union Attribute *rec, char AttrName[ATTR_SIZE], union Attribute AttrVal, int op){
 	recId recid = {-1, -1};
-	AttrCatEntry *attrcat_entry;
+	AttrCatEntry attrcat_entry;
 	
 	//get Attribute catalog entry corresponding to the relid, AttrName
-	OpenRelTable::getAttrCatEntry(relid, AttrName, attrcat_entry);
+	OpenRelTable::getAttrCatEntry(relid, AttrName, &attrcat_entry);
 	
-	if(attrcat_entry->root_block == -1){ //No index for the attribute
+	if(attrcat_entry.root_block == -1){ //No index for the attribute
 		if(op == RST){
 			recId prev_recid ={-1, -1};
 			OpenRelTable::setPrevRecId(relid, prev_recid);
-			return recid;
+			return SUCCESS;
 		}
 		recid = linear_search(relid, AttrName, AttrVal, op);
 	}
@@ -17,10 +17,15 @@ recId ba_search(relId relid, char AttrName[ATTR_SIZE], union Attribute AttrVal, 
 		if(op == RST){
 			SearchIndexId sid = {-1, -1};
 			OpenRelTable::setSearchIndexId(relid, AttrName, sid);
-			return recid;
+			return SUCCESS;
 		}
 		recid = bplus_search(relid, AttrName, AttrVal, op);
 	}
 	
-	return recid;
+	RecBuffer *rec_buffer;
+	rec_buffer = Buffer::getRecBuffer(recid.block);
+	rec_buffer->getRecord(rec, recid.slot);
+	Buffer::releaseBlock(recid.block);
+	
+	return SUCCESS;
 }

@@ -31,7 +31,7 @@ int compare(union Attribute attr1, union Attribute attr2, int AttrType){
 struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute AttrVal, int op){
 	recId recid = {-1, -1};
 	SearchIndexId sid;
-	AttrCatEntry *attrcatentry;
+	AttrCatEntry attrcatentry;
 	int root_block, block_num;
 	int index_num;
 	int num_entries;	// in each index block
@@ -39,14 +39,14 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 	int attr_type;
 	int iter;
 	struct HeadInfo header;
-	struct InternalEntry *internal_entry;
-	struct Index *leaf_entry;
+	struct InternalEntry internal_entry;
+	struct Index leaf_entry;
 	IndBuffer *ind_buffer;
 	int flag, cond; //FLAGS
 	
-	OpenRelTable::getAttrCatEntry(relid, AttrName, attrcat_entry);
-	root_block = attrcat_entry->root_block;
-	attr_type = attrcat_entry->attr_type;
+	OpenRelTable::getAttrCatEntry(relid, AttrName, &attrcat_entry);
+	root_block = attrcat_entry.root_block;
+	attr_type = attrcat_entry.attr_type;
 	
 	sid = OpenRelTable::getSearchIndexId(relid, AttrName);
 	if(sid.sblock == -1 && sid.sindex == -1){
@@ -71,8 +71,8 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 			}
 			
 			for(iter = 0; iter < num_entries, iter++){ 
-				ind_buffer->getEntry(internal_entry, iter);
-				flag = compare(AttrVal, internal_entry->attrval, attr_type);
+				ind_buffer->getEntry(&internal_entry, iter);
+				flag = compare(AttrVal, internal_entry.attrval, attr_type);
 			
 				cond = 0;
 				switch(op){
@@ -101,13 +101,13 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 						
 				if(cond == 1){
 					Buffer::releaseBlock(block_num);
-					block_num = internal_entry->lchild;
+					block_num = internal_entry.lchild;
 					break;
 				}
 					
 				if(iter == num_entries){
 					Buffer::releaseBlock(block_num);
-					block_num = internal_entry->rchild; // go to right child if attrval is greater than
+					block_num = internal_entry.rchild; // go to right child if attrval is greater than
 														// all attribute values of internal node
 				}
 			}
@@ -139,8 +139,8 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 	}
 	
 	for(iter = index_num; iter < num_entries; iter++){
-		ind_buffer->getEntry(leaf_entry, iter);
-		flag = compare(AttrVal, leaf_entry->attrval, attr_type);
+		ind_buffer->getEntry(&leaf_entry, iter);
+		flag = compare(AttrVal, leaf_entry.attrval, attr_type);
 		
 		cond = 0;
 		switch(op){
@@ -181,8 +181,8 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 			}
 						
 			if(cond == 1){ // setting search index id
-				recid.block = leaf_entry->block; 
-				recid.slot = leaf_entry->slot;
+				recid.block = leaf_entry.block; 
+				recid.slot = leaf_entry.slot;
 				sid.sblock = block_num;
 				sid.sindex = iter;
 				OpenRelTable::setSearchIndexId(relid, AttrName, sid);

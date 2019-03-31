@@ -60,8 +60,8 @@ recId getFreeSlot(int block_num){
 }
 
 int ba_insert(relId relid, union Attribute *rec){
-	RelCatEntry *relcat_entry;
-	AttrCatEnrty *attrcat_entry;
+	RelCatEntry relcat_entry;
+	AttrCatEnrty attrcat_entry;
 	int first_block;
 	int num_attrs;
 	int num_slots;
@@ -71,10 +71,10 @@ int ba_insert(relId relid, union Attribute *rec){
 	RecBuffer *rec_buffer;
 	struct HeadInfo header;
 	
-	OpenRelTable::getRelCatEntry(relid, relcat_entry);
-	first_block = relcat_entry->first_blk;
-	num_slots = relcat_entry->num_slots_blk;
-	num_attrs = relcat_entry->num_attr;
+	OpenRelTable::getRelCatEntry(relid, &relcat_entry);
+	first_block = relcat_entry.first_blk;
+	num_slots = relcat_entry.num_slots_blk;
+	num_attrs = relcat_entry.num_attr;
 	
 	unsigned char slotmap[num_slots];
 	//getting free slot
@@ -95,14 +95,14 @@ int ba_insert(relId relid, union Attribute *rec){
 	rec_buffer->setSlotmap(slotmap);
 	Buffer::releaseBlock(recid.block);
 	//increasing number of entries in relation catalog entry
-	relcat_entry->num_entries = relcat_entry->num_entries + 1;
-	OpenRelTable::setRelCatEntry(relid, relcat_entry);
+	relcat_entry.num_entries = relcat_entry.num_entries + 1;
+	OpenRelTable::setRelCatEntry(relid, &relcat_entry);
 	
 	//inserting entries into index block if exits for attributes
 	for(iter = 0; iter < num_attrs; iter++){
-		OpenRelTable::getAttrCatEntry(relid, iter, attrcat_entry);
-		if(attrcat_entry->root_block != -1){ //if index presents for the attribute
-			bplus_insert(relid, attrcat_entry->attr_name, rec[iter], recid); //inserting bplus tree
+		OpenRelTable::getAttrCatEntry(relid, iter, &attrcat_entry);
+		if(attrcat_entry.root_block != -1){ //if index presents for the attribute
+			bplus_insert(relid, attrcat_entry.attr_name, rec[iter], recid); //inserting bplus tree
 		}	
 	}
 	

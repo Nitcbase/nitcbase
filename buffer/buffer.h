@@ -24,6 +24,8 @@ private:
 
 public:
 	//methods
+	Buffer();
+	~Buffer();
 	static class RecBuffer *getFreeRecBlock();
 	static class IndBuffer *getFreeIndInternal();
 	static class IndBuffer *getFreeIndLeaf();

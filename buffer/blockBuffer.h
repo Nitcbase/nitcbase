@@ -53,6 +53,8 @@ public:
 	 * Refer to following link for more info:
 	 * https://stackoverflow.com/questions/15114093/getting-source-type-is-not-polymorphic-when-trying-to-use-dynamic-cast
 	 */
+
+	//https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors  also useful
 	virtual ~BlockBuffer();
 };
 

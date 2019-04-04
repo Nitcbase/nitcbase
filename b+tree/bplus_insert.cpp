@@ -2,6 +2,7 @@
 #include "../buffer/blockBuffer.h"
 #include "../buffer/buffer.h"
 #include "../define/id.h"
+#include "../cache/cache.h"
 #include <cstring>
 
 
@@ -25,7 +26,15 @@ int compareAttr(union Attribute val1,union Attribute val2,int type ){
     }
 }
 
-int bplus_insert(int root_block,union Attribute val,recId rec_id, int type_attr){
+void setparent(int childblock,int parblock){
+    class IndBuffer *tempchildblk=Buffer::getIndBlock(childblock);
+    struct HeadInfo tempheader=tempchildblk->getheader();
+    tempheader.pblock=parblock;
+    delete tempchildblk;
+    return;
+}
+
+int bplus_insert(int root_block,union Attribute val,recId rec_id, int type_attr, int relid, int attr_offset){
     struct Index indexval;
     indexval.attrval=val;
     indexval.block=rec_id.block;
@@ -45,25 +54,22 @@ int bplus_insert(int root_block,union Attribute val,recId rec_id, int type_attr)
         int getter;
         getter=head->getEntry((void *)(&elem),0);
         
-        int compare_val=compareAttr(indexval.attrval,elem.attrval,type_attr);
-        if(compare_val<=1){
-            child_head=elem.lchild;
-        }else{
-            int iter;
-            for(iter=1;iter<nEntries;iter++){
-                getter=head->getEntry((void *)(&elem),iter);
-                int compare_val1=compareAttr(indexval.attrval,elem.attrval,type_attr);
-                if(compare_val1<=1){
-                    child_head=elem.lchild;
-                    break;
-                }
+        
+        int iter;
+        for(iter=0;iter<nEntries;iter++){
+            getter=head->getEntry((void *)(&elem),iter);
+            int compare_val1=compareAttr(indexval.attrval,elem.attrval,type_attr);
+            if(compare_val1<=1){
+                child_head=elem.lchild;
+                break;
+            }
 
-            }
-            if(iter==nEntries){
-                child_head=elem.rchild;
-            }
         }
-        bplus_insert(child_head,val,rec_id,type_attr);
+        if(iter==nEntries){
+            child_head=elem.rchild;
+        }
+        
+        bplus_insert(child_head,val,rec_id,type_attr,relid,attr_offset);
 
     }else{
         int nEntries=header.num_entries;
@@ -99,10 +105,10 @@ int bplus_insert(int root_block,union Attribute val,recId rec_id, int type_attr)
             for(iter=0;iter<nEntries;iter++){
                 getter=head->getEntry((void *)(&elem),iter);
                 int compare_val=compareAttr(indexval.attrval,elem.attrval,type_attr);
-                if(compare_val<=1){
+                if(compare_val==0||compare_val==2){
                     ind=iter;
                 }
-                getter=head->getEntry((void *)(&attrs[iter]),iter);
+                attrs[iter]=elem;
             }
             ind++;
             for(iter=nEntries;iter>ind;iter--){
@@ -114,18 +120,30 @@ int bplus_insert(int root_block,union Attribute val,recId rec_id, int type_attr)
             struct HeadInfo newblkheader=new_blk->getheader();
 
             for(iter=0;iter<32;iter++){
-                getter=head->setEntry((void *)(&attrs[iter]),iter);//head->setattrval(attrs[iter],iter);
-                getter=new_blk->setEntry((void *)(&attrs[iter]),32+iter);//new_blk->setattrval(attrs[32+iter],iter);
+                setter=head->setEntry((void *)(&attrs[iter]),iter);
+                setter=new_blk->setEntry((void *)(&attrs[iter]),32+iter);
             }
             union Attribute new_attrval;
             new_attrval=attrs[31].attrval;
             header.num_entries=32;
             newblkheader.num_entries=32;
             newblkheader.pblock=par_block;
+            newblkheader.rblock=header.rblock; // change lblock of header.rblock as well if not -1
+            newblkheader.lblock=root_block;
+            header.rblock=new_blk->getblocknum();
+            class IndBuffer *right_blk=Buffer::getIndBlock(newblkheader.rblock);
+            struct HeadInfo rblk_header=right_blk->getheader();
+            rblk_header.lblock=new_blk->getblocknum();
+            right_blk->setheader(rblk_header);
+            delete right_blk;
+
+            
             head->setheader(header);
             new_blk->setheader(newblkheader);
             int new_blocknum=new_blk->getblocknum();
-            int child_block=head->getblocknum();
+            int child_block=root_block;
+
+            delete new_blk;
 
             while(success==false){
                 if(par_block!=-1){
@@ -162,11 +180,9 @@ int bplus_insert(int root_block,union Attribute val,recId rec_id, int type_attr)
                         newblkheader.pblock=par_block;  //might have to change this line to load new_blocknum or even might not need this.
                         new_blk->setheader(newblkheader);
                         success=true;
-                        //close parblock, blocks which need to be.
+                        
+                        delete parblk;
                     }else{
-                        //close childblk,newblk
-                        //getnewfreeinternalblk
-                        //split internalentries array in to parblk and new_internalblk
                         class IndBuffer* new_blk=Buffer::getFreeIndInternal();
                         newblkheader=new_blk->getheader();
 
@@ -176,24 +192,52 @@ int bplus_insert(int root_block,union Attribute val,recId rec_id, int type_attr)
                         }
                         parheader.num_entries=50;
                         newblkheader.num_entries=50;
-                        newblkheader.pblock=parheader.pblock;
+                        //newblkheader.pblock=parheader.pblock;
                         parblk->setheader(parheader);
                         new_blk->setheader(newblkheader);
+                        new_blocknum=new_blk->getblocknum();
                         //set the pblock of all childs appropriately
+                        for(iter=0;iter<newblkheader.num_entries;iter++){
+                            setparent(internal_entries[iter].lchild,new_blocknum);
+                        }
+                        setparent(internal_entries[newblkheader.num_entries-1].rchild,new_blocknum);
+
                         child_block=par_block;
                         par_block=parheader.pblock;
                         struct InternalEntry internalval;
                         new_attrval=internal_entries[50].attrval;
                         //close parblk
-                        
+                        delete parblk;
+                        delete new_blk;
                     }
 
 
                 }else{
                     //get new internal block 
-                    //add lblock=root,rblock=#new_block..only one single entry in head;
+                    class IndBuffer* new_head=Buffer::getFreeIndInternal();
+                    struct HeadInfo newhead_header=new_blk->getheader();
+
+                    struct InternalEntry internalval;
+                    internalval.attrval=new_attrval;
+                    internalval.lchild=child_block;
+                    internalval.rchild=new_blocknum;
+                    new_head->setEntry((void *)&internalval,0);
+
+                    newhead_header.pblock=-1;
+                    newhead_header.num_entries=1;
+                    new_head->setheader(newhead_header);
+
                     //update head of respective cache element
+                    AttrCatEntry attrib_cat;
+                    int flag= OpenRelTable::getAttrCatEntry(relid,attr_offset,&attrib_cat);
+                    attrib_cat.root_block=new_head->getblocknum();
+                    int flag= OpenRelTable::setAttrCatEntry(relid,attr_offset,&attrib_cat);
+                    
                     //update par of both rblock and lblock
+                    setparent(child_block,new_head->getblocknum());
+                    setparent(new_blocknum,new_head->getblocknum());
+
+                    delete new_head;
                     success=true;
                 }
             }
@@ -202,6 +246,6 @@ int bplus_insert(int root_block,union Attribute val,recId rec_id, int type_attr)
 
         
     }
-    // close head
-
+    delete head;
+    return SUCCESS;
 }

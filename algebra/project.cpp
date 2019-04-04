@@ -13,7 +13,7 @@ bool isEqualName(char* str1,char *str2){
 
 int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, char tar_attrs[][ATTR_SIZE]){
     int srcrelid,targetrelid;
-    int flag;
+    int flag,iter;
 
     srcrelid=OpenRelTable::getRelId(srcrel);
     if(srcrelid==FAILURE){
@@ -37,9 +37,9 @@ int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, cha
     int attr_offset[tar_nAttrs];
     int attr_type[tar_nAttrs];
 
-    for(iter=0;iter<tar_attrs;iter++){
-        AttrCatEntry attrcat;
-        flag=OpenRelTable::getAttrCatEntry(tar_attrs[iter]);
+    for(iter=0;iter<tar_nAttrs;iter++){
+        struct AttrCatEntry attrcat;
+        flag=OpenRelTable::getAttrCatEntry(srcrelid,tar_attrs[iter],&attrcat);
         if(flag==FAILURE){
             return FAILURE; // attribute not in src rel.
         }
@@ -54,7 +54,18 @@ int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, cha
     targetrelid=OpenRelTable::OpenRel(targetrel);
 
     while(1){
-        //get record from src insert into target rel
+        union Attribute rec[nAttrs];
+        flag=ba_search(srcrelid,rec,attr,val,op);
+        if(flag=SUCCESS){
+            union Attribute proj_rec[tar_nAttrs];
+
+            for(iter=0;iter<tar_nAttrs;iter++){
+                proj_rec[iter]=rec[attr_offset[iter]];
+            }
+            ba_insert(targetrelid,proj_rec);
+        }else{
+            break;
+        }
     }
 
     int flag;

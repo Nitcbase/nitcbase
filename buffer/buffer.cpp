@@ -6,6 +6,30 @@
 #include "../disk/disksimulator.cpp"
 #include <cstring>
 
+Buffer::Buffer(){
+	int iter;
+	for(iter=0;iter<4;iter++){
+		readblock(block_alloc_map+iter*BLOCK_SIZE,iter);
+	}
+
+	for(iter=0;iter<32;iter++){
+		metainfo[iter].dirty=false;
+		metainfo[iter].free=true;
+	}
+}
+
+Buffer::~Buffer(){
+	int iter;
+	for(iter=0;iter<4;iter++){
+		writeblock(iter,(void*)(block_alloc_map+iter*BLOCK_SIZE));
+	}
+	for(iter=0;iter<32;iter++){
+		if(!metainfo[iter].free && metainfo[iter].dirty){
+			writeblock(metainfo[iter].block_num,(void*)blocks[iter]);
+		}
+	}
+
+}
 
 int Buffer::getBlockType(int buffer_index){
 	int block_type = *(int32_t *)&blocks[buffer_index][0];
@@ -19,7 +43,11 @@ int Buffer::getFreeBuffer(){
 			return iter;
 		}
 	}
-	return -1; ///no free buffer
+
+	if(iter==32){
+		//use replacement to get free buffer block
+	}
+	//return -1; ///no free buffer
 }
 
 int Buffer::getbufferblock(int block){
@@ -33,10 +61,7 @@ int Buffer::getbufferblock(int block){
 }
 
 int Buffer::loadBlock(int block_num){
-	int free_buffer=getFreeBuffer();
-	if(free_buffer==-1){
-		return -1; /// Buffer replaceent algorithm goes here ////
-	}
+	int free_buffer=getFreeBuffer();// always gives free buffer no. even if buffer is full(replacement)
 	
 	//////code to copy block from disk to buffer////////////////
 
@@ -72,10 +97,11 @@ void Buffer::releaseBufferBlock(int buffer_index){
 unsigned char* Buffer::get_buf_dataptr(int block_num){
 	int buffer_block=getbufferblock(block_num);
 	if(buffer_block==-1){
-		//use replacement algo
-	}else{
-		return &(blocks[buffer_block][0]);
+		buffer_block=loadBlock(block_num);
+
 	}
+	
+	return &(blocks[buffer_block][0]);
 }
 
 //Public functions
@@ -96,7 +122,7 @@ class RecBuffer * Buffer::getFreeRecBlock(){
 			return NULL;
 		}
 		*(int32_t *)&blocks[FreeBuffer][0]=REC;
-		*(int32_t *)&blocks[FreeBuffer][16]=0;
+		*(int32_t *)&blocks[FreeBuffer][16]=0; //#entries=0
 		
 		metainfo[FreeBuffer].free=false;
 		metainfo[FreeBuffer].dirty=true;
@@ -126,7 +152,8 @@ class IndBuffer * Buffer::getFreeIndInternal(){
 			return NULL;
 		}
 		*(int32_t *)&blocks[FreeBuffer][0]=IND_INTERNAL;
-		*(int32_t *)&blocks[FreeBuffer][16]=0;
+		*(int32_t *)&blocks[FreeBuffer][16]=0; //#entries=0
+		*(int32_t *)&blocks[FreeBuffer][4]=-1; //pblock=-1
 
 		metainfo[FreeBuffer].free=false;
 		metainfo[FreeBuffer].dirty=true;
@@ -157,7 +184,8 @@ class IndBuffer * Buffer::getFreeIndLeaf(){
 			return NULL;
 		}
 		*(int32_t *)&blocks[FreeBuffer][0]=IND_LEAF;
-		*(int32_t *)&blocks[FreeBuffer][16]=0;
+		*(int32_t *)&blocks[FreeBuffer][16]=0; //#entries=0
+		*(int32_t *)&blocks[FreeBuffer][4]=-1; //pblock=-1
 		
 		metainfo[FreeBuffer].free=false;
 		metainfo[FreeBuffer].dirty=true;
@@ -225,7 +253,7 @@ void Buffer::releaseBlock(int block_num){ //To release and commit to disk.
 
 	if(buffer_block!=-1){
 		if(metainfo[buffer_block].dirty){
-		 int write_to_disk=writeblock(block_num, (void*) (&blocks[buffer_block][0]));
+		 int write_to_disk=writeblock(block_num, (void*) (blocks[buffer_block]));
 		}
 		releaseBufferBlock(buffer_block);
 	}

@@ -44,10 +44,13 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     }
 
     while(1){
-        // get element from ba_search
-        // if flag returns failure stop
-        // use algebra insert to insert to target rel
-
+        union Attribute rec[nAttrs];
+        flag=ba_search(srcrelid,rec,attr,val,op);
+        if(flag=SUCCESS){
+            ba_insert(targetrelid,rec);
+        }else{
+            break;
+        }
     }
 
     return SUCCESS;

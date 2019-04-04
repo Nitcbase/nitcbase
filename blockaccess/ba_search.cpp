@@ -25,7 +25,7 @@ int ba_search(relId relid, union Attribute *rec, char AttrName[ATTR_SIZE], union
 	RecBuffer *rec_buffer;
 	rec_buffer = Buffer::getRecBuffer(recid.block);
 	rec_buffer->getRecord(rec, recid.slot);
-	Buffer::releaseBlock(recid.block);
+	delete rec_buffer;
 	
 	return SUCCESS;
 }

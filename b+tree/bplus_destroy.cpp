@@ -3,7 +3,7 @@ int bplus_destroy(int block_num){
 	int block_type;
 	struct HeadInfo header;
 	
-	ind_buffer = getIndBlock(block_num);
+	ind_buffer = Buffer::getIndBlock(block_num);
 	if(ind_buffer == NULL)	//problem in accessing block of given block number
 		return FAILURE;
 		
@@ -22,9 +22,11 @@ int bplus_destroy(int block_num){
 			bplus_destroy(internal_entry.lchild);
 		}
 		bplus_destroy(internal_entry.rchild);
+		delete ind_buffer;
 		Buffer::deleteblock(block_num);
 	}
 	else if(block_type == INDLEAF){
+		delete ind_buffer;
 		Buffer::deleteblock(block_num);
 	}
 	else{

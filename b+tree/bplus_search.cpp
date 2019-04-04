@@ -66,7 +66,7 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 			num_entries = header.num_entries;
 			
 			if(block_type == IND_LEAF){
-				Buffer::releaseBlock(block_num);
+				delete ind_buffer;
 				break;
 			}
 			
@@ -100,13 +100,13 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 				}
 						
 				if(cond == 1){
-					Buffer::releaseBlock(block_num);
+					delete ind_buffer;
 					block_num = internal_entry.lchild;
 					break;
 				}
 					
 				if(iter == num_entries){
-					Buffer::releaseBlock(block_num);
+					delete ind_buffer;
 					block_num = internal_entry.rchild; // go to right child if attrval is greater than
 														// all attribute values of internal node
 				}
@@ -122,7 +122,7 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 	num_entries = header.num_entries;
 	
 	if(index_num == num_entries){ // attrval equals to last index value
-		Buffer::releaseBlock(block_num);
+		delete ind_buffer;
 		block_num = header.rblock; // next leaf child
 		if(block_num == -1){
 			sid.sblock = -1;
@@ -195,7 +195,7 @@ struct recId bplus_search(relId relid, char AttrName[ATTR_SIZE], union Attribute
 				break;
 			}
 	}
-	Buffer::releaseBlock(block_num);
+	delete ind_buffer;
 	
 	return recid;
 }

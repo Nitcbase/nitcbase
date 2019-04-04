@@ -9,7 +9,7 @@ int ba_delete(char RelName[ATTR_SIZE]){
 	RecBuffer *rec_buffer = Buffer::getRecBuffer(relcat_recid.block);
 	union Attribute relcat_rec[5]; // number of relation catalog is 5;
 	rec_buffer->getRecord(relcat_rec, relcat_recid.slot); // getting the relation catalog entry corresponding to RelName
-	Buffer::releaseBlock(relcat_recid.block);
+	delete rec_buffer;
 	
 	int block_num = relcat_rec[3].ival; // fist record block of the relation
 	int num_attrs = relcat_rec[1].ival;
@@ -51,7 +51,7 @@ int ba_delete(char RelName[ATTR_SIZE]){
 		rec_buffer->setSlotmap(attrcat_slotmap);
 		header.num_entries = header.num_entries - 1; //since one slot is made free
 		rec_buffer->setheader(header);
-		Buffer::releaseBlock(attrcat_recid.block);
+		delete rec_buffer;
 		
 		// deleting index blocks of the attribute
 		root_block = attrcat_rec[4]; //getting root block for the attribute
@@ -70,7 +70,7 @@ int ba_delete(char RelName[ATTR_SIZE]){
 	rec_buffer->setSlotmap(relcat_slotmap);
 	header.num_entries = header.num_entries - 1;
 	rec_buffer->setheader(header);
-	Buffer::releaseBlock(relcat_recid.block);
+	delete rec_buffer;
 	
 	//Adjusting the Relation Catalog and Attribute Catalog 
 	rec_buffer = Buffer::getRecBuffer(4); //block num 4 corresponds to relation catalog record block
@@ -80,7 +80,7 @@ int ba_delete(char RelName[ATTR_SIZE]){
 	rec_buffer->getRecord(relcat_rec, 2); //slot num 2 corresponds to attribute catalog record
 	relcat_rec[2] = relcat_rec[2] - num_attrs; //all the attribute entries of the relation are deleted
 	rec_buffer->setRecord(relcat_rec, 2);
-	Buffer::releaseBlock(4);
+	delete rec_buffer;
 	
 	return SUCCESS;
 }

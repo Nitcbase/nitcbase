@@ -21,7 +21,7 @@ recId getFreeSlot(int block_num){
 				break;
 			}
 		}
-		Buffer::releaseBlock(block_num);
+		delete rec_buffer;
 		if(iter < num_slots){
 			recid = {block_num, iter};
 			return recid;
@@ -47,7 +47,7 @@ recId getFreeSlot(int block_num){
 	rec_buffer->getSlotmap(slotmap);
 	memset(slotmap, 0, sizeof(slotmap)); //all slots are free
 	rec_buffer->setSlotmap(slotmap);
-	Buffer::releaseBlock(block_num);
+	delete rec_buffer;
 	//recid
 	recid = {block_num, 0};
 	//setting prev_block_num rblock to new block
@@ -55,7 +55,7 @@ recId getFreeSlot(int block_num){
 	header = rec_buffer->getheader();
 	header.rblock = block_num;
 	rec_buffer->setheader(header);
-	Buffer::releaseBlock(prev_block_num);
+	delete rec_buffer;
 	return recid;
 }
 
@@ -93,7 +93,7 @@ int ba_insert(relId relid, union Attribute *rec){
 	rec_buffer->getSlotmap(slotmap);
 	slotmap[recid.slot] = '1';
 	rec_buffer->setSlotmap(slotmap);
-	Buffer::releaseBlock(recid.block);
+	delete rec_buffer;
 	//increasing number of entries in relation catalog entry
 	relcat_entry.num_entries = relcat_entry.num_entries + 1;
 	OpenRelTable::setRelCatEntry(relid, &relcat_entry);

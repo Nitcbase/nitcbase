@@ -11,7 +11,7 @@ int ba_renamerel(char OldRelName[ATTR_SIZE], char NewRelName[ATTR_SIZE]){
 	rec_buffer->getRecord(relcat_rec, relcat_recid.slot); // getting the relation catalog entry corresponding to RelName
 	strncpy(relcat_rec[0].strval, NewRelName, ATTR_SIZE); // setting new relation name in relation catalog
 	rec_buffer->setRecord(relcat_rec, relcat_recid.slot);
-	Buffer::releaseBlock(relcat_recid.block);
+	delete rec_buffer;
 	
 	int num_attrs = relcat_rec[1].ival; //number of attributes corresponding to the relation
 	
@@ -31,7 +31,7 @@ int ba_renamerel(char OldRelName[ATTR_SIZE], char NewRelName[ATTR_SIZE]){
 		rec_buffer->getRecord(attrcat_rec, attrcat_recid.slot); // getting the attribute catalog entry corresponding to RelName
 		strncpy(attrcat_rec[0].strval, NewRelName, ATTR_SIZE); // setting new relation name in attribute catalog
 		rec_buffer->setRecord(attrcat_rec, attrcat_recid.slot);
-		Buffer::releaseBlock(attrcat_recid.block);
+		delete rec_buffer;
 	}
 	
 	return SUCCESS;

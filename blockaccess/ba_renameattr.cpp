@@ -21,7 +21,7 @@ int ba_renamerel(char RelName[ATTR_SIZE], char OldAttrName[ATTR_SIZE], char NewA
 			rec_buffer->getRecord(attrcat_rec, attrcat_recid.slot); //getting the attribute catalog entry corresponding to AttrName
 			strncpy(attrcat_rec[1].strval, NewAttrName, ATTR_SIZE); //setting new attribute name in attribute catalog
 			rec_buffer->setRecord(attrcat_rec, attrcat_recid.slot);
-			Buffer::releaseBlock(attrcat_recid.block);
+			delete rec_buffer;
 			break;
 		}
 	}

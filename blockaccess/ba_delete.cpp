@@ -21,7 +21,7 @@ int ba_delete(char RelName[ATTR_SIZE]){
 		rec_buffer = Buffer::getRecBuffer(block_num);
 		header = rec_buffer->getheader();
 		next_block_num = header.rblock;
-		
+		delete rec_buffer;
 		Buffer::deleteBlock(block_num);
 		block_num = next_block_num;
 	}

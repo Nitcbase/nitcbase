@@ -1,5 +1,5 @@
 #include "../define/id.h"
-int ba_renamerel(char RelName[ATTR_SIZE], char OldAttrName[ATTR_SIZE], char NewAttrName[ATTR_SIZE]){
+int ba_renameattr(char RelName[ATTR_SIZE], char OldAttrName[ATTR_SIZE], char NewAttrName[ATTR_SIZE]){
 	recId relcat_recid = linear_search(0, "RelName", OldRelName, EQ); //relid 0 corresponds to relation catalog
 	
 	if(relcat_recid.block == -1 && relcat_recid.slot == -1){

@@ -103,6 +103,7 @@ int ba_insert(relId relid, union Attribute *rec){
 		OpenRelTable::getAttrCatEntry(relid, iter, &attrcat_entry);
 		if(attrcat_entry.root_block != -1){ //if index presents for the attribute
 			bplus_insert(relid, attrcat_entry.attr_name, rec[iter], recid); //inserting bplus tree
+			/* WRITE FAILURE CONDITION */
 		}	
 	}
 	

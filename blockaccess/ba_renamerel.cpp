@@ -1,7 +1,7 @@
 #include "../define/id.h"
 int ba_renamerel(char OldRelName[ATTR_SIZE], char NewRelName[ATTR_SIZE]){
 	recId relcat_recid = linear_search(0, "RelName", OldRelName, EQ); //relid 0 corresponds to relation catalog
-	
+	/* CHECK WHETHER NEW RELATION EXIST*/
 	if(relcat_recid.block == -1 && relcat_recid.slot == -1){
 		return FAILURE;
 	}

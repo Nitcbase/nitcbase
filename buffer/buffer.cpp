@@ -118,7 +118,7 @@ class RecBuffer * Buffer::getFreeRecBlock(){
 		return NULL;
 	}else{
 		int FreeBuffer=getFreeBuffer();
-		if(FreeBuffer==-1){///no free buffer found -- Replacement must be done
+		if(FreeBuffer==-1){ //To be changed -> replaacement is done
 			return NULL;
 		}
 		*(int32_t *)&blocks[FreeBuffer][0]=REC;
@@ -200,10 +200,10 @@ class IndBuffer * Buffer::getFreeIndLeaf(){
 }
 
 class RecBuffer * Buffer::getRecBlock(int block_num){
-	int buffer_block=getbufferblock(block_num);
+	int buffer_block=getbufferblock(block_num); //if block is already in buffer
 
 	if(buffer_block==-1){
-		buffer_block=loadBlock(block_num);
+		buffer_block=loadBlock(block_num); //replacement will be done in this
 	}
 
 	if(buffer_block!=-1){

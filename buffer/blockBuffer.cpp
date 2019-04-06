@@ -62,6 +62,7 @@ void RecBuffer::setSlotmap(unsigned char *slotmap){
 }
 
 void RecBuffer::getRecord(union Attribute *rec,int slot_num){ //Assumes enough memory is allocated.
+	//make return type int and keep error checks
 	unsigned char* data_ptr=get_dataptr();
 	int num_of_attrib=*((int32_t*) (data_ptr + 5*4));
 	int num_of_slots=*((int32_t*) (data_ptr + 6*4));
@@ -116,31 +117,3 @@ int IndLeaf::setEntry(void *ptr, int index_num){
 	*((struct Index*) (data_ptr + 32 + index_num*24))=Entry;
 	return SUCCESS;
 }
-/*
-
-struct InternalEntry IndInternal::getInternalEntry(int index_num){
-	unsigned char* data_ptr=get_dataptr();
-	struct InternalEntry Entry;
-	Entry=*((struct InternalEntry*) (data_ptr + 32 + index_num*24)); 
-	return Entry;
-}
-
-void IndInternal::setInternalEntry(struct InternalEntry Entry,int index_num){
-	unsigned char* data_ptr=get_dataptr();
-	*((struct InternalEntry*) (data_ptr + 32 + index_num*24))=Entry; 
-	return ;
-}
-
-struct Index IndLeaf::getIndexval(int index_num){
-	unsigned char* data_ptr=get_dataptr();
-	struct Index IndexEntry;
-	IndexEntry=*((struct Index*) (data_ptr + 32 + index_num*32)); 
-	return IndexEntry;
-}
-
-void IndLeaf::setIndexval(struct Index IndexEntry,int index_num){
-	unsigned char* data_ptr=get_dataptr();
-	*((struct Index*) (data_ptr + 32 + index_num*32))=IndexEntry; 
-	return ;
-}
-*/

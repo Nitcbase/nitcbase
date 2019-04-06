@@ -21,7 +21,7 @@ int ba_search(relId relid, union Attribute *rec, char AttrName[ATTR_SIZE], union
 		}
 		recid = bplus_search(relid, AttrName, AttrVal, op);
 	}
-	
+	//write error condition
 	RecBuffer *rec_buffer;
 	rec_buffer = Buffer::getRecBuffer(recid.block);
 	rec_buffer->getRecord(rec, recid.slot);

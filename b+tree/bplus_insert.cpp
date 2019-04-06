@@ -35,6 +35,7 @@ void setparent(int childblock,int parblock){
 }
 
 int bplus_insert(int root_block,union Attribute val,recId rec_id, int type_attr, int relid, int attr_offset){
+    /* Change attributes -> relid, attrname, attrval, recid */
     struct Index indexval;
     indexval.attrval=val;
     indexval.block=rec_id.block;

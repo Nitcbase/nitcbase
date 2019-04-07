@@ -3,6 +3,7 @@
 #include "../define/constants.h"
 #include <string.h>
 
+// LAST ARGUMENT SHOULD BE char[].
 int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE], int op, union Attribute val){
     int srcrelid,targetrelid;
 
@@ -47,7 +48,7 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
         union Attribute rec[nAttrs];
         flag=ba_search(srcrelid,rec,attr,val,op);
         if(flag=SUCCESS){
-            ba_insert(targetrelid,rec);
+            ba_insert(targetrelid,rec); /* IF BA_INSERT FAILS? */ /*TARGET RELATION MUST BE OPENED */
         }else{
             break;
         }

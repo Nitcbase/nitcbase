@@ -24,7 +24,7 @@ int insert(char relname[16], int nAttrs, char attr[][16]){
         struct AttrCatEntry attrcatentry;
         OpenRelTable::getAttrCatEntry(relid,iter,&attrcatentry);
         int type=attrcatentry.attr_type;
-        if(type==INT){
+        if(type==INT){  /* CHECK FOR TYPE MISMATCH HERE*/
             attrval[iter].ival=atoi(attr[iter]);
         }else if(type==FLOAT){
             //take accordingly to float

@@ -28,7 +28,7 @@ int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, cha
     for(iter=0;iter<tar_nAttrs;iter++){
         for(iter2=iter+1;iter2<tar_nAttrs;iter++){
             if(isEqualName(tar_attrs[iter],tar_attrs[iter2])){
-                return FAILURE; //two attrs. having same name in list
+                return FAILURE; //two attrs. having same name in list /* NOT NEEDED -- CREATE TAKES CARE */
             }
         }
     }

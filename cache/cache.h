@@ -45,12 +45,13 @@ public:
 	static int CloseRel(relId rel_id);
 	static int getRelCatEntry(relId rel_id, RelCatEntry *relcat_buf);
 	static int setRelCatEntry(relId rel_id, RelCatEntry *relcat_buf);
-	static recId getPrevRecId(relId rel_id);
+	static recId getPrevRecId(relId rel_id); /*CHANGE INTERFACE HERE*/
 	static int setPrevRecId(relId rel_id, recId rid);
 	static int getAttrCatEntry(relId rel_id, char attr_name[ATTR_SIZE], AttrCatEntry *attrcat_buf);
 	static int getAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry *attrcat_buf);
 	static int setAttrCatEntry(relId rel_id, char attr_name[ATTR_SIZE], AttrCatEntry *attrcat_buf);
 	static int setAttrCatEntry(relId rel_id, int attr_offset, AttrCatEntry *attrcat_buf);
+	/* CHANGE THE NAME AND OVERLOAD*/
 	static SearchIndexId getSearchIndexId(relId rel_id, char attr_name[ATTR_SIZE]);
 	static SearchIndexId getSearchIndexId(relId rel_id, int attr_offset);
 	static int setSearchIndexId(relId rel_id, char attr_name[ATTR_SIZE], SearchIndexId sid);

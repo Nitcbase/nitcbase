@@ -9,3 +9,5 @@
 #define E_RELEXIST -8
 #define E_ATTRNOTEXIST -9
 #define E_ATTREXIST -10
+#define E_CACHEFULL -11
+#define E_NOTOPEN -12

@@ -8,7 +8,7 @@ int dropindex(char relname[ATTR_SIZE],char attr[ATTR_SIZE]){
 
     if(relid!=FAILURE) return FAILURE; // specified relation is opened
 
-    int flag=bplus_destroy(relid,attr);
+    int flag=bplus_destroy(relid,attr); /* ARGUMENT SHOULD BE ROOT BLOCK */
 
     return flag;
 }

@@ -14,3 +14,4 @@
 #define E_RELNOTOPEN -13
 #define E_NATTRMISMATCH -14
 #define E_DUPLICATEATTR -15
+#define E_RELOPEN -16

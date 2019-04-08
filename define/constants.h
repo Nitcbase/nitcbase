@@ -25,3 +25,7 @@
 #define INT 0
 #define STRING 1
 #define FLOAT 2
+
+
+#define RELCAT_RELID 0
+#define ATTRCAT_RELID 1

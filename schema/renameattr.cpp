@@ -4,11 +4,11 @@
 
 int renameattr(char relname[ATTR_SIZE], char OldAttrName[ATTR_SIZE], char NewAttrName){
     int relid=OpenRelTable::getRelId(relname);
-    if(relid!=FAILURE){
-        return FAILURE; // relation is opened
+    if(relid!=E_NOTOPEN){
+        return E_OPEN; // relation is open
     }
 
-    int ba_rename_attr= ba_renameattr(relname,OldAttrName,NewAttrName);
+    int flag= ba_renameattr(relname,OldAttrName,NewAttrName);
 
-    return ba_rename_attr;
+    return flag;
 }

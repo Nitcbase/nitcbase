@@ -6,8 +6,8 @@
 int insert(char relname[16], int nAttrs, char attr[][16]){
     int relid=OpenRelTable::getRelId(relname);
 
-    if(relId==FAILURE){
-        return FAILURE; //relation not open
+    if(relid==E_NOTOPEN){
+        return E_NOTOPEN; //relation not open
     }
 
     struct RelCatEntry relcatentry;
@@ -33,7 +33,7 @@ int insert(char relname[16], int nAttrs, char attr[][16]){
         }
     }
 
-    int blk_access_insert=ba_insert(relid,attrval);
-    return blk_access_insert;
+    int flag=ba_insert(relid,attrval);
+    return flag;
 
 }

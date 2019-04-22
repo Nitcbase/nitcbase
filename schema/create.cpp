@@ -2,6 +2,7 @@
 #include "../cache/cache.h"
 #include "../define/id.h"
 #include "../define/constants.h"
+#include "../define/errors.h"
 #include<string.h>
 
 int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[]){
@@ -15,7 +16,7 @@ int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
     targetrelid=linear_search(0,"RelName", attrval, EQ);
 
     if(targetrelid.block!=-1){
-        return FAILURE; //Relation name already exists.
+        return E_RELEXIST; //Relation name already exists.
     }
     int iter;
     for(iter=0;iter<nAttrs;iter++){
@@ -23,7 +24,7 @@ int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
         // check if attrtype[iter] lies in 0-2 or not
         for(iter2=iter+1;iter2<nAttrs;iter2++){
             if(strcmp(attrs[iter],attrs[iter2])==0){
-                return FAILURE;  //distinct attributes having same name.
+                return E_DUPLICATEATTR;  //distinct attributes having same name.
             }
         }
     }
@@ -36,7 +37,12 @@ int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
     relcatrec[3].ival=-1;
     relcatrec[4].ival=(2016/(16*nAttrs+1));
 
-    ba_insert(0,relcatrec);
+    int flag=ba_insert(0,relcatrec);
+
+    if(flag!=SUCCESS){
+        ba_delete(relname);
+        return flag;
+    }
 
     for(iter=0;iter<nAttrs;iter++){
         union Attribute attrcatrec[6];//relname,attrname,attrtype,primaryflag,rootblk,offset
@@ -48,7 +54,12 @@ int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
         attrcatrec[4].ival=-1;
         attrcatrec[5].ival=iter;
 
-        ba_insert(1,attrcatrec);
+        flag=ba_insert(1,attrcatrec);
+
+        if(flag!=SUCCESS){
+            ba_delete(relname);
+            return flag;
+        }
 
     }
 

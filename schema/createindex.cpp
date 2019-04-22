@@ -6,7 +6,7 @@
 int createindex(char relname[ATTR_SIZE],char attr[ATTR_SIZE]){
     int relid=OpenRelTable::getRelId(relname);
 
-    if(relid==FAILURE) return FAILURE; // specified relation not opened
+    if(relid==E_NOTOPEN) return relid; // specified relation not opened
 
     int flag=bplus_create(relid,attr);
 

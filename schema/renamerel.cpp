@@ -5,11 +5,11 @@
 
 int renamerel(char Oldrelname[ATTR_SIZE],char Newrelname[ATTR_SIZE]){
     int relid=OpenRelTable::getRelId(Oldrelname);
-    if(relid!=FAILURE){
-        return FAILURE; // relation is open
+    if(relid!=E_NOTOPEN){
+        return E_OPEN; // relation is open
     }
 
-    int ba_rename_relation= ba_renamerel(Oldrelname,Newrelname);
+    int flag= ba_renamerel(Oldrelname,Newrelname);
 
-    return ba_rename_relation;
+    return flag;
 }

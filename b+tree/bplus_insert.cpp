@@ -121,7 +121,7 @@ int bplus_insert(int relid,char attrname[ATTR_SIZE],union Attribute val,recId re
         }
         attrs[ind]=indexval;
 
-        class IndBuffer* new_blk=Buffer::getFreeIndInternal(); //if fails..delete indexing
+        class IndBuffer* new_blk=Buffer::getFreeIndLeaf(); //if fails..delete indexing
         struct HeadInfo newblkheader=new_blk->getheader();
 
         for(iter=0;iter<32;iter++){

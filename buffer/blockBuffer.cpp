@@ -16,14 +16,8 @@ BlockBuffer::BlockBuffer(int blk_no){
 struct HeadInfo BlockBuffer::getheader(){
 	unsigned char* data_ptr=get_dataptr();
 	struct HeadInfo head;
-	head.block_type=*(int32_t *)(data_ptr);
-	head.pblock= *(int32_t *)(data_ptr + 4);
-	head.lblock= *(int32_t *)(data_ptr + 2*4);
-	head.rblock= *(int32_t *)(data_ptr + 3*4);
-	head.num_entries= *(int32_t *)(data_ptr + 4*4);
-	head.num_attrs=*(int32_t *)(data_ptr + 5*4);
-	head.num_slots=*(int32_t *)(data_ptr + 6*4);
 
+	head=*((struct HeadInfo*)(data_ptr));
 	return head;
 }
 

@@ -24,11 +24,11 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     if(flag!=SUCCESS){
         return flag; // target attribute name not found
     }
-    if(tar_attr==INT){  /* CHECK FOR TYPE MISMATCH HERE*/
+    if(tar_attr.attr_type==INT){  /* CHECK FOR TYPE MISMATCH HERE*/
         attrval[iter].ival=atoi(attr[iter]);
-    }else if(tar_attr==FLOAT){
+    }else if(tar_attr.attr_type==FLOAT){
         //take accordingly to float
-    }else if(tar_attr==STRING){
+    }else if(tar_attr.attr_type==STRING){
         strcpy(attrval[iter].sval,attr[iter]);
     }
 
@@ -51,7 +51,7 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     if(flag!=SUCCESS){
         return flag; // unable to create target relation
     }
-    targetrelid=OpenRelTable::OpenRel(targetrel);
+    targetrelid=openRel(targetrel);
     if(targetrelid==E_CACHEFULL){
         flag=deleterel(targetrel);
         return E_CACHEFULL;
@@ -63,7 +63,7 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
         if(flag=SUCCESS){
             ba_insert(targetrelid,rec);
             if(flag!=SUCCESS){
-                OpenRelTable::CloseRel(targetrelid);
+                closeRel(targetrel);
                 deleterel(targetrel);
                 return flag; //unable to insert into target relation.
             }
@@ -71,6 +71,6 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
             break;
         }
     }
-
+    closeRel(targetrel);
     return SUCCESS;
 }

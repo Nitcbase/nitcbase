@@ -23,16 +23,6 @@ int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, cha
     struct RelCatEntry srcrelcat;
     flag=OpenRelTable::getRelCatEntry(srcrelid,&srcrelcat);
     int nAttrs=srcrelcat.num_attr;
-
-    /*int iter,iter2;
-    for(iter=0;iter<tar_nAttrs;iter++){
-        for(iter2=iter+1;iter2<tar_nAttrs;iter++){
-            if(isEqualName(tar_attrs[iter],tar_attrs[iter2])){
-                return FAILURE; 
-            }
-        }
-    }*/ //two attrs. having same name in list /* NOT NEEDED -- CREATE TAKES CARE */
-
     
     int attr_offset[tar_nAttrs];
     int attr_type[tar_nAttrs];
@@ -51,7 +41,7 @@ int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, cha
     if(flag!=SUCCESS){
         return flag; // unable to create target relation
     }
-    targetrelid=OpenRelTable::OpenRel(targetrel);
+    targetrelid=openRel(targetrel);
     if(targetrelid==E_CACHEFULL){
         flag=deleterel(targetrel);
         return E_CACHEFULL;
@@ -68,7 +58,7 @@ int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, cha
             }
             flag=ba_insert(targetrelid,proj_rec);
             if(flag!=SUCCESS){
-                OpenRelTable::CloseRel(targetrelid);
+                closeRel(targetrel);
                 deleterel(targetrel);
                 return flag; //unable to insert into target relation.
             }
@@ -76,6 +66,6 @@ int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, cha
             break;
         }
     }
-
+    closeRel(targetrel);
     return SUCCESS;
 }

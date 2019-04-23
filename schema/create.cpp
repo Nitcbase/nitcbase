@@ -13,9 +13,10 @@ int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
     union Attribute attrval;
     strcpy(attrval.sval,relname);
 
-    targetrelid=linear_search(0,"RelName", attrval, EQ);
+    union Attribute relcatrec[6];//relname,#attrs,#records,firstblk,slotsperblk
+    int flag=ba_search(0,relcatrec,"RelName", attrval, EQ);
 
-    if(targetrelid.block!=-1){
+    if(flag==SUCCESS){
         return E_RELEXIST; //Relation name already exists.
     }
     int iter;
@@ -28,8 +29,6 @@ int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
             }
         }
     }
-
-    union Attribute relcatrec[5];//relname,#attrs,#records,firstblk,slotsperblk
 
     strcpy(relcatrec[0].sval,relname);
     relcatrec[1].ival=nAttrs;

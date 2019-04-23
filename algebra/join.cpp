@@ -79,7 +79,7 @@ int join(char srcrel1[ATTR_SIZE],char srcrel2[ATTR_SIZE],char targetrel[ATTR_SIZ
         return flag; // target rel may already exist or attrs more than limit or ...
     }
 
-    targetrelid=OpenRelTable::OpenRel(targetrel);
+    targetrelid=openRel(targetrel);
 
     if(targetrelid==E_CACHEFULL){
         flag=deleterel(targetrel);
@@ -104,11 +104,12 @@ int join(char srcrel1[ATTR_SIZE],char srcrel2[ATTR_SIZE],char targetrel[ATTR_SIZ
 
             flag=ba_insert(targetrelid,tar_record);
             if(flag!=SUCCUESS){
-                closerel()
+                closeRel(targetrel);
                 deleterel(targetrel);
             }
             return flag;
         }   
     }
+    closeRel(targetrel);
     return SUCCESS;
 }

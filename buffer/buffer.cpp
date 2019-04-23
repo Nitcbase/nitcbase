@@ -70,19 +70,6 @@ int Buffer::loadBlock(int block_num){
 	metainfo[free_buffer].block_num=block_num;
 
 	int block_type = *(int32_t *)(&blocks[free_buffer][0]);
-
-	/*if(block_type==REC){
-		class RecBuffer* newRecBuffer= new RecBuffer(block_num);
-		//metainfo[free_buffer].blk=newRecBuffer;
-	}else{
-		if(block_type==IND_INTERNAL){
-		  class IndBuffer* newIndBuffer= new IndInternal(block_num);
-		  //metainfo[free_buffer].blk=newIndBuffer;
-		}else if(block_type==IND_LEAF){
-		  class IndBuffer* newIndBuffer= new IndLeaf(block_num);
-		  //metainfo[free_buffer].blk=newIndBuffer;
-		}
-	} */
 	return free_buffer;
 }
 

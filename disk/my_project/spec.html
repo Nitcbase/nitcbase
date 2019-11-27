@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>Interface usage specification</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+    
+    
+<body>
+    <div class="header" id="top">
+        <div id="title">
+            <h1> INTERFACE USAGE SPECIFICATION</h1>
+            <!--h3> Database Management System</h3-->
+        </div>
+   </div>
+    
+    </br></br>
+
+     </br>
+     <div>
+				 
+                      <b style="font-size:16px;color:#009100">(1) </b><b><i>Syntax</i></b> : <tt> help </tt><br/>
+                          <b><i>Semantics</i></b> : </i>  It displays the general syntax and function of all the commands.
+					<br/>
+					<br/>
+                     <b style="font-size:16px;color:#009100">(2) </b><b><i>Syntax</i></b> : <tt>fdisk</tt><br/>
+                          <b><i>Semantics</i></b> : </i>It is used to create the disk (”disk.xfs”) or to format the disk if already created.
+					<br/>
+					</br>
+                              <li><b style="font-size:16px;color:#009100">(3) </b><b><i>Syntax</i> : </i></b><tt> load </b>  &lt;pathname&gt;</tt><br/>
+                            <b><i>Semantics</i> : </i></b> Loads a relation from the host file system to the disk</li>
+					<br/>
+				
+                              <li><b style="font-size:16px;color:#009100">(4) </b><b><i>Syntax</i> : </i></b><tt>export</b> &lt;xfs_filename&gt; &lt;pathname&gt; </tt> </tt><br/>
+                            <b><i>Semantics</i>:  </i></b> export files from the disk to the host filesystem.</li>
+					<br/>
+                            <li><b style="font-size:16px;color:#009100">(5) </b><b><i>Syntax</i></b> : </i><tt> rm &lt;xfs_filename&gt; </tt><br/>
+                       <b><i>Semantics</i></b> : </i>Remove the relation from the disk <br/>
+                    </li>
+					<br/>
+					<li>
+                        <b style="font-size:16px;color:#009100">(6) </b><b><i>Syntax</i></b> : </i><tt> ls  </tt><br/>
+                    <b><i>Semantics</i></b> : </i> Displays the list of relations in the disk.<br/>
+					   </li>
+					<br/>
+<li><b style="font-size:16px;color:#009100">(7) </b><b><i>Syntax</i></b> : </i><tt> db</tt><br/>
+<b><i>Semantics</i></b> : </i> Display block allocation map</li>
+					<br/>
+<li><b style="font-size:16px;color:#009100">(8) </b><b><i>Syntax</i></b> : </i><tt> cat  &lt;xfs_filename&gt;</tt> :<br/>
+<b><i>Semantics</i></b> : </i>  It displays the contents of a relation in the filesystem.<br/>
+					
+					<br/>
+<li><b style="font-size:16px;color:#009100">(9) </b><b><i>Syntax</i></b> : </i><tt> copy &lt;start_block&gt; &lt;end_block&gt; &lt;unix_filename&gt;</tt></li></tt>
+<b><i>Semantics</i></b> : </i> Copies the contents of specified block(s) in the filesystem to the specified filepath</li>
+					<br/></br>
+<li><b style="font-size:16px;color:#009100">(10) </b><b><i>Syntax</i></b> : </i><tt> dump relcat</tt><br/>
+<b><i>Semantics</i></b> : </i> It copies the contents of relation catalog to an external file named relationcatalog.txt.</tt>. </li>
+					<br/>
+<li><b style="font-size:16px;color:#009100">(11) </b><b><i>Syntax</i></b> : </i><tt> dump attrcat</tt><br/>
+<b><i>Semantics</i></b> : </i> It copies the contents of attribute catalog to an external file named attributecatalog.txt. </li>
+					<br/>
+<li><b style="font-size:16px;color:#009100">(12) </b><b><i>Syntax</i></b> : </i><tt> exit</tt> <br/>
+<b><i>Semantics</i></b> : </i> Exit the interface</li>
+          <br/>
+</body>
+
+</html>

@@ -4,6 +4,142 @@
 #include "../define/error.h"
 using namespace std;
 
+BlockBuffer::BlockBuffer(int blockNum){
+// set the blockNum field of the object to input argument.
+this->blockNum = blockNum;
+
+// copy the block into buffer using getBlock function.
+/***Note: disregard the return type***/
+/***To be updated: make it camel case***/
+getBlock();
+
+}
+
+BlockBuffer::BlockBuffer(char blockType){
+/***Note: disregard the return type***/
+
+// allocate a block on the disc and a buffer in memory to hold the new block of given type using getFreeBlock function.
+
+// set the blockNum field of the object to that of the allocated block number.
+int type;
+if(blockType == 'R')
+	type = REC;
+else if(blockType == 'I')
+	type = IND_INTERNAL;
+else
+	type = IND_LEAF;
+	
+this->blockNum = getFreeBlock(type);
+}
+
+unsigned char * BlockBuffer::getBufferPtr(){
+	//find the buffer index of the block using getBlock() 
+	int bufferIndex = getBlock();
+	
+	// return the pointer to this buffer (blocks[bufferIndex]).
+	return staticBuffer.blocks[bufferIndex];
+}
+
+void BlockBuffer::getHeader(struct HeadInfo *head){	
+/***To be updated: make it camel case***/
+// get the starting address of the buffer containing the block using getBufferPtr. 
+	 unsigned char * startOfBuffer = getBufferPtr();
+	        
+//copy the header of block to the memory location pointed to by the argument head using appropriate type casting
+	*head = *((struct HeadInfo*) (startOfBuffer));
+
+}
+
+void BlockBuffer::setHeader(struct HeadInfo *head){
+/***To be updated: make it camel case***/
+// get the starting address of the buffer containing the block using getBufferPtr.
+	unsigned char * startOfBuffer = getBufferPtr();
+	
+//copy the contents of the memory location pointed to by the argument head to the header of block using appropriate type casting
+	*((struct HeadInfo*) (startOfBuffer)) = *head;
+
+}
+
+int BlockBuffer::getBlock(){
+/***To be updated: return type must be int***/
+     //check whether the block is already present in the buffer using StaticBuffer.getBufferNum() .
+		int bufferIndex = staticBuffer.getBufferNum(this->blockNum);
+		
+     //if present, set the timestamp of the corresponding buffer to 0 and increment the timpestamps of all other occupied buffers in the BufferMetaInfo.
+     if(bufferIndex != -1){
+     	for (int i = 0;i<32;++i) {
+     		if(staticBuffer.metaInfo[i].timeStamp != -1)
+     			staticBuffer.metaInfo[i].timeStamp++;
+     	}
+     	staticBuffer.metaInfo[bufferIndex].timeStamp=0;
+     }
+     
+     //if not present, get a free buffer using StaticBuffer.getFreeBuffer() and read the block into the free buffer using readBlock().
+     else {
+     	bufferIndex = staticBuffer.getFreeBuffer(this->blockNum);
+     	readblock((void *)staticBuffer.blocks[bufferIndex],this->blockNum);
+     }
+   
+}
+
+int BlockBuffer::getFreeBlock(int blockType){
+//iterate through the StaticBuffer.blockAllocMap and find the index of a free block in the disk.
+	int blockNum=-1;
+	for(int i=0;i<32;++i)
+		if(((int32_t)(staticBuffer.blockAllocMap[i]))==USED)
+			blockNum = i;
+	
+   
+//if no block is free, return FAILURE.
+	if(blockNum == -1)
+		return FAILURE;
+   
+//find a free buffer using StaticBuffer.getFreeBuffer() 
+	int bufferIndex = staticBuffer.getFreeBuffer(this->blockNum);
+
+//update StaticBuffer.blockAllocMap.
+	staticBuffer.blockAllocMap[blockNum] = (unsigned char) blockType;
+   
+//update the block type of the block to the input block type using Blockbuffer.setBlockType().
+/***To be updated: no need for Blockbuffer.setBlockType()***/
+	setBlockType(blockType);
+	
+   
+//return block number of the free block.
+	return blockNum;
+
+}
+
+int BlockBuffer::getBlockNum(){
+
+//return corresponding block number
+	return this->blockNum;
+}
+
+int BlockBuffer::getBlockType(int bufferIndex){
+
+//blocks[bufferIndex][0] gives the staring address of the buffer
+/***To be updated:[0] is not required***/
+unsigned char * startOfBuffer = staticBuffer.blocks[bufferIndex];
+
+//retrieve the first 4 bytes of the buffer that stores the block type.
+	int blockType = *((int32_t*)(startOfBuffer));
+	return blockType;
+	
+}
+
+void BlockBuffer::setBlockType(int blockType){						
+//find the starting address of the buffer using BlockBuffer.getBufferPtr()
+/***To be updated: no need for BlockBuffer.***/
+unsigned char * startOfBuffer = getBufferPtr();
+
+//store the given block type in the first 4 bytes of the buffer
+*((int32_t*)(startOfBuffer)) = blockType;
+
+//update the BlockAllocMap 
+staticBuffer.blockAllocMap[this->blockNum] = (unsigned char) blockType;
+	
+}
 
 
 /****************************************Record Buffer**************************************************/
@@ -83,5 +219,33 @@ int IndInternal::setEntry(void *ptr, int indexNum){
     return SUCCESS;
 
 }
-/****************************************************************************************************************************/
+/******************************************************IND_LEAF**********************************************************************/
+IndLeaf::IndLeaf() : IndBuffer('L'){}
+
+IndLeaf::IndLeaf(int blockNum) : IndBuffer(blockNum){}
+
+int IndLeaf::getEntry(void *ptr, int indexNum){
+/***To be updated: camel case for index_num.***/
+
+// get the starting address of the buffer containing the block using BlockBuffer.getBufferPtr().
+/***To be updated: no need for BlockBuffer.***/
+unsigned char * startOfBuffer = getBufferPtr();
+
+// if the indexNum is not in range of 0-(#Entries(in block)+1), return E_OUTOFBOUND
+/***To be updated: not + 1.***/
+int numEntries = *((int32_t *)(startOfBuffer + 4 * 4));
+
+if((indexNum<0) || indexNum > numEntries)
+	return E_OUTOFBOUND;
+
+// copy the indexNum'th Index entry in block to memory ptr(ptr can be type casted appropriately if needed). 
+	struct Index Entry;
+	Entry=*((struct Index*) (startOfBuffer + 32 + indexNum*32));
+	*((struct Index*)ptr) = Entry;
+	
+    
+// return SUCCESS.
+	return SUCCESS;
+
+}
 

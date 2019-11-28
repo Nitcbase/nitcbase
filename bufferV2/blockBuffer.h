@@ -75,7 +75,7 @@ public:
 
 class IndInternal : public IndBuffer{
 public:
-	IndInternal()
+	IndInternal();//update in documentation
 	IndInternal(int blk_no);
 	int getEntry(void *ptr, int indexNum) ;
 	int setEntry(void *ptr, int indexNum) ;
@@ -100,5 +100,4 @@ public:
 	//https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors  also useful
 	virtual ~BlockBuffer();
 };*/
-
 

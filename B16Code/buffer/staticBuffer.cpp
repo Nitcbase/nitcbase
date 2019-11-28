@@ -46,29 +46,68 @@ int StaticBuffer::getFreeBuffer(int blockNum){
     }
     
     // if free buffer is available, bufferIndex is the index of the free buffer.
-    int bufferIndex;
+    int bufferIndex = -1;
     for(int it = 0;it<32;it++)
     {
-      if(metaInfo[it].free == true)
+      if(metainfo[it].free == true){
           bufferIndex = it;
+          break;
+      }
     }
     
     // if free buffer is not available, replace the buffer with the largest timestamp and set it as bufferIndex.
-    largest_timestamp = -1;
-    largest_index = -1;
-    for(int it = 0;it < 32;it++)
-    {
-       if(metainfo[it].timeStamp > largest_timestamp)
-       {
-          largest_timestamp =  metainfo[it].timeStamp;
-          largest_index = it;
-       }
+    if(bufferIndex == -1){
+        largest_timestamp = -1;
+        largest_index = -1;
+        for(int it = 0;it < 32;it++)
+        {
+            if(metainfo[it].timeStamp > largest_timestamp)
+            {
+              largest_timestamp =  metainfo[it].timeStamp;
+              largest_index = it;
+            }
+        }
+        writeblock(metainfo[largest_index].blockNum, (void*)blocks[largest_index]);
+        bufferIndex = largest_index;
     }
-    writeblock(metainfo[largest_index].blockNum, (void*)blocks[largest_index]);
-    bufferIndex = largest_index;
   
     
     // update the metainfo array corresponding to the buffer index. 
+    metainfo[bufferIndex].dirty = false;
+    metainfo[bufferIndex].free = false;
+    metainfo[bufferIndex].timeStamp = 0;
+    metainfo[bufferIndex].blockNum = blockNum;
+
     
     // return the buffer index
+    return bufferIndex;
+}
+
+
+ int StaticBuffer::getBufferNum(int blockNum){
+    //traverse through the metainfo array, find the buffer index of the buffer to which the block is loaded.
+     int bufferIndex = -1;
+     for(int it = 0;it < 32;it++)
+     {
+        if(metainfo[it].blockNum == blockNum)
+        {
+            bufferIndex = it;
+            break;
+        }
+     }
+    
+    //if found return buffer index, else indicate failure.
+    if(bufferIndex == -1)
+         return FAILURE;
+     
+    return bufferIndex;
+}
+
+
+int StaticBuffer::getStaticBlockType(int blockNum){
+    //traverse the blockAllocMap to find the type corresponding to blockNum.
+    //doubt
+    
+    //return the blockType obtained(REC/IND_INTERNAL/IND_LEAF/UNUSED)
+    return (int)blockAllocMap[blockNum];
 }

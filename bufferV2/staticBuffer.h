@@ -5,7 +5,7 @@ struct BufferMetaInfo {
 	bool free;
 	bool dirty;
 	int blockNum;
-	int timeStamp
+	int timeStamp;
 };
 
 class StaticBuffer {

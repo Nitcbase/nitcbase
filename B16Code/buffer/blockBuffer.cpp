@@ -249,3 +249,16 @@ if((indexNum<0) || indexNum > numEntries)
 
 }
 
+int IndLeaf::setEntry(void *ptr, int indexNum){						
+    unsigned char* bufferPtr = getBufferPtr();
+    //TODO : update #Entries(in block)-1
+    int numOfEntries = *((int32_t*) (bufferPtr + 4*4));
+    if(indexNum<0 || indexNum > numOfEntries - 1) //to be updated 
+        return E_OUTOFBOUND;
+    struct Index Entry;
+    Entry = (*(struct Index*)ptr);
+	*((struct Index*) (bufferPtr + 32 + indexNum*32)) = Entry;
+	//TODO : update dirty bit
+    return SUCCESS;
+}
+

@@ -1273,11 +1273,13 @@ fclose(fptr);
 
 void rm(char *relname)
 {
+	
 	char s[5];
 	FILE *disk=fopen("disk.txt","r+");
 	//fseek(disk,4*2048+12,SEEK_SET);
 	//Search for relation info in relcat
 	int curr_blk=4;int next_blk;int i;int first_block;
+	//Read from the entire relation catalog
 	while(curr_blk!=-1)
 	{
 		fseek(disk,curr_blk*2048+12,SEEK_SET);

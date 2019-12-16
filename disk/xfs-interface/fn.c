@@ -207,7 +207,7 @@ void parse(char *filename)
 	int first_blk=getfreeblock();
 	int curr_blk=first_blk;
 	int prev_blk=-1;
-	int no_of_slots=floor(2016/(count*16+1));
+	int no_of_slots=(2016/(count*16+1));
 	int no_of_rec=number_of_records(file);
 	//printf("No of rec%d",no_of_rec);
 	fclose(file);
@@ -247,7 +247,7 @@ void parse(char *filename)
 		if(no_of_rec>=no_of_slots)
 		{
 
-			 no_of_entries=no_of_slots;
+			no_of_entries=no_of_slots;
 			sprintf(t, "%d", no_of_slots);
 			fputs(t,disk);
 			fputc('\0',disk);
@@ -389,12 +389,24 @@ void ls()
 		no_of_entries=atoi(s);
 		//printf("%d\n",no_of_entries);
 		int i;char rel_name[17];
-		for(i=0;i<no_of_entries;i++)
+		for(i=32;i<52;i++)
+		{
+			fseek(disk,curr_blk*2048+i,SEEK_SET);
+			char c = fgetc(disk);
+			if(c=='1')
+			{
+				fseek(disk,curr_blk*2048+52+(i-32)*96,SEEK_SET);
+				fgets(rel_name,17,disk);
+				printf("%s\n",rel_name);
+			}
+			
+		}
+		/*for(i=0;i<no_of_entries;i++)
 			{
 			fseek(disk,curr_blk*2048+52+i*96,SEEK_SET);
 			fgets(rel_name,17,disk);
 			printf("%s\n",rel_name);
-			}
+			}*/
 
 		curr_blk=next_blk;
 	}
@@ -516,8 +528,9 @@ void meta()
 	fseek(disk,4*2048+116, SEEK_SET);	
 	fputs("4",disk);
 	fputc('\0',disk);
-	fseek(disk,4*2048+132, SEEK_SET);	
-	fputs("16",disk);
+	fseek(disk,4*2048+132, SEEK_SET);
+//made changes here	
+	fputs("20",disk);
 	fputc('\0',disk);
 
 	fseek(disk,4*2048+148, SEEK_SET);	
@@ -1271,131 +1284,226 @@ fclose(fptr);
 	
 }
 
+//Function to remove a relation from the xfs - disk.
+
 void rm(char *relname)
 {
-	
+	// Attempts to remove relation or attribute catalog should not be allowed.
+
+	if(strcmp(relname,"ATTRIBUTECATALOG")==0||strcmp(relname,"RELATION_CATALOG")==0)
+	{
+		printf("Removal of the relation not allowed !\n");
+		return;
+	}
+		
 	char s[5];
 	FILE *disk=fopen("disk.txt","r+");
 	//fseek(disk,4*2048+12,SEEK_SET);
 	//Search for relation info in relcat
-	int curr_blk=4;int next_blk;int i;int first_block;
+	int curr_blk=4;
+	int next_blk;
+	int i;
+	int first_block;int prev_blk=4;
 	//Read from the entire relation catalog
 	while(curr_blk!=-1)
 	{
 		fseek(disk,curr_blk*2048+12,SEEK_SET);
 		fgets(s,5,disk);
+		//next block of the current block
 		next_blk=atoi(s);
-		int no_of_entries;
-	
+		/*int no_of_entries;
 		fseek(disk,curr_blk*2048+16,SEEK_SET);
 		fgets(s,5,disk);
+		Number of entries in the current block
 		no_of_entries=atoi(s);
-		//printf("%d\n",no_of_entries);
+		printf("%d\n",no_of_entries);*/
 		char rel_name[17];
-		for(i=0;i<no_of_entries;i++)
-			{
-			fseek(disk,curr_blk*2048+52+i*96,SEEK_SET);
-			fgets(rel_name,17,disk);
-			if(strcmp(rel_name,relname)==0)
-			{
-				fseek(disk,curr_blk*2048+52+i*96+48,SEEK_SET);
+		//Traverse through the slots by looking at the slotmap to see which all slots are occupied
+		for(i=32;i<52;i++)
+		{
+			fseek(disk,curr_blk*2048+i,SEEK_SET);
+			char c = fgetc(disk);
+			// If slot is occupied, do the following
+			if(c=='1')
+			{	
+				fseek(disk,curr_blk*2048+52+(i-32)*96,SEEK_SET);
 				fgets(rel_name,17,disk);
-				first_block= atoi(rel_name);
-				printf("\nInRM!!!---%d\n---",first_block);
-				break;
-				
-					
+				// If the entry corresponding to the given relation name is found,break the loop
+				if(strcmp(rel_name,relname)==0)
+				{
+					fseek(disk,curr_blk*2048+52+(i-32)*96+48,SEEK_SET);
+					fgets(rel_name,17,disk);
+					// Store the starting block of the relation to be removed
+					first_block= atoi(rel_name);
+					printf("\nInRM!!!---%d\n---",first_block);
+					break;
+				}
 			}
-			}
-		if(i!=no_of_entries)
+			
+		}
+		if(i!=52)
 			break;
+		prev_blk=curr_blk;
 		curr_blk=next_blk;
 	}
+
 	if(curr_blk==-1)
 	{
 		printf("Relation does not exist!");
 		return;
 	}
-	int rel_pos=i;
+	//The entry number or slot number is stored in rel_pos.
+	int rel_pos=i-32;
 	//printf("\nRELPOSSS%dCURRBlock%d",rel_pos,curr_blk);
 	//update disk free block due to nullifying relation catalog entry
 	char s1[5];
 	fseek(disk,curr_blk*2048+16,SEEK_SET);
 	fgets(s1,5,disk);
 	//number of entries in relation catalog block containing the relation's entry.
-	int no=atoi(s);
+	int no=atoi(s1);
 	no=no-1;
+	
 	if(no==0)
 	{
-		
+		//if the block has only one entry, the block will be free hence update block allocation map
 		fseek(disk,curr_blk,SEEK_SET);	
 		fputc('0',disk);
+		int j;
+
+		//Fill header with zeroes
+		fseek(disk,curr_blk*2048,SEEK_SET);
+		for(j=0;j<52;j++)
+			fputc('0',disk);
+
+		//Fill the slot with zeroes
+		j=0;
+		while(j<6)
+		{	//printf("\nPrinting zeroes in relcat");
+			//printf("\nRELPOSSS%dCURRBlock%d",rel_pos,curr_blk);
+			fseek(disk,curr_blk*2048+52+rel_pos*96+j*16,SEEK_SET);
+			fputs("0000000000000000",disk);
+			j++;
+		}
+		//Make next of prev_blk as next_blk
+		fseek(disk,prev_blk*2048+12,SEEK_SET);
+		char t[5];
+		sprintf(t,"%d",next_blk);
+		fputs(t,disk);
+		// Updating the prev pointer of next
+		if(next_blk!=-1)
+		{fseek(disk,next_blk*2048+8,SEEK_SET);
+		sprintf(t,"%d",prev_blk);
+		fputs(t,disk);}
+		
 	}
-	fseek(disk,curr_blk*2048+16,SEEK_SET);
-	char t3[5];
-	sprintf(t3,"%d",no);
-	fputs(t3,disk);
-	int j=0;
-	while(j<6)
-	{	printf("\nPrinting zeroes in relcat");
-		printf("\nRELPOSSS%dCURRBlock%d",rel_pos,curr_blk);
-		fseek(disk,curr_blk*2048+52+rel_pos*96+j*16,SEEK_SET);
-		fputs("0000000000000000",disk);
-		j++;
+	// if the block has other entries as well
+	else
+	{
+		//reduce no of entries by 1
+		fseek(disk,curr_blk*2048+16,SEEK_SET);
+		char t3[5];
+		printf("hhhh!!!!!!!!%d",no);
+		sprintf(t3,"%d",no);
+		fputs(t3,disk);
+		// make the slot corresponding to slot number i free 
+		fseek(disk,curr_blk*2048+i,SEEK_SET);
+		fputc('0',disk);
+		int j=0;
+		while(j<6)
+		{	
+			printf("\nPrinting zeroes in relcat");
+			printf("\nRELPOSSS%dCURRBlock%d",rel_pos,curr_blk);
+			fseek(disk,curr_blk*2048+52+rel_pos*96+j*16,SEEK_SET);
+			fputs("0000000000000000",disk);
+			j++;
+		}
 	}
 	
-	char tempo[17];
-	fseek(disk,curr_blk*2048+52+rel_pos*96+0*16,SEEK_SET);
-	fgets(tempo,17,disk);
-	printf("\nttttt%s",tempo);
-	curr_blk=5;int n_attr=0;
+// ----Modify the attribute catalog------
+
+	curr_blk=5;int n_attr=0;prev_blk=5;
 	while(curr_blk!=-1)
 	{
 		fseek(disk,curr_blk*2048+12,SEEK_SET);
 		fgets(s,5,disk);
 		next_blk=atoi(s);
 		int no_of_entries;
-	
 		fseek(disk,curr_blk*2048+16,SEEK_SET);
 		fgets(s,5,disk);
 		no_of_entries=atoi(s);
-		//printf("%d\n",no_of_entries);
+		printf("%d\n",no_of_entries);
 		int i;char rel_name[17];
-		for(i=0;i<no_of_entries;i++)
-			{
-			fseek(disk,curr_blk*2048+52+i*96,SEEK_SET);
+		for(i=32;i<52;i++)
+		{
+			fseek(disk,curr_blk*2048+52+(i-32)*96,SEEK_SET);
 			fgets(rel_name,17,disk);
 			int j=0;
 			if(strcmp(rel_name,relname)==0)
-			{	n_attr++;
+			{	
+				//if the entry corresponds to the given relation name
+				n_attr++;
+				// Filling the slot with zeroes
 				while(j<6)
 				{	
-					fseek(disk,curr_blk*2048+52+i*96+j*16,SEEK_SET);
+					fseek(disk,curr_blk*2048+52+(i-32)*96+j*16,SEEK_SET);
 					fputs("0000000000000000",disk);
 					j++;
-				}	
+				}
+				//Making the slot free
+				fseek(disk,curr_blk*2048+i,SEEK_SET);
+				fputc('0',disk);	
 			}
-			}
+		}
+		// Update no of entries in header
 		no_of_entries=no_of_entries-n_attr;
 		char s2[5];
 		fseek(disk,curr_blk*2048+16,SEEK_SET);
 		sprintf(s2, "%d", no_of_entries);
 		fputs(s2,disk);
+
 		if(no_of_entries==0)
-		{
+		{	
+			//update disk free list
 			fseek(disk,curr_blk,SEEK_SET);
 			fputc('0',disk);
+			
+			int j;
+			//Fill header with zeroes
+			fseek(disk,curr_blk*2048,SEEK_SET);
+			for(j=0;j<52;j++)
+				fputc('0',disk);
+			//Updating the next pointer of previous
+			fseek(disk,prev_blk*2048+12,SEEK_SET);
+			char t[5];
+			sprintf(t,"%d",next_blk);
+			fputs(t,disk);
+			// Updating the prev pointer of next
+			if(next_blk!=-1)
+			{fseek(disk,next_blk*2048+8,SEEK_SET);
+			sprintf(t,"%d",prev_blk);
+			fputs(t,disk);}
+			
+			
 		}
+	prev_blk=curr_blk;
 	curr_blk=next_blk;	
 	}
+
+
+//-----Modifying the blocks of the relation-----
+
 	curr_blk=first_block;
 	while(curr_blk!=-1)
-	{		
+	{	
+		//Update free blocks in block allocation map
+		fseek(disk,curr_blk,SEEK_SET);
+		fputc('0',disk);	
 		fseek(disk,curr_blk*2048+12,SEEK_SET);
 		char s[5];
 		fgets(s,5,disk);
 		int next_blk=atoi(s);
 		fseek(disk,curr_blk*2048,SEEK_SET);
+		// Fill block content as 0
 		int j=0;
 		while(j<2048)
 		{

@@ -26,7 +26,7 @@ int main()
 		//If command is exit,return else keep looping
 		if(strcmp(command,"exit")==0)
 		{
-			return;
+			return 0;
 		}
 		else if(strcmp(command,"ls")==0)
 		{

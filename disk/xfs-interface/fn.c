@@ -24,6 +24,8 @@ void attrcat(char *rel_name,char attr_name[][16],char attr_type[][16],int count,
 void relcat(char *rel_name,int attr,int rec,int first,int last,int slots);
 void formatdisk();
 void meta();
+
+//to return the data type of the attribute
 int check_type(char *data)
 {	
 	int count_int=0,count_dot=0,count_string=0,i;
@@ -37,23 +39,22 @@ int check_type(char *data)
 		else
 			count_string++;
 	}
-	//printf("%d:%d:%d:%d",count_int,count_dot,count_string,i);
 	if(count_dot==1&&count_int==(strlen(data)-1))
-		return 0;
+		return 0;//float 
 	if(count_int==strlen(data))
-		return 1;
+		return 1;//integer
 	else
-		return 2;
+		return 2;//string
 }
 
-
+//returns a free block in the disk.
 int getfreeblock()
 {
       FILE *disk=fopen("disk.txt","r+");
       fseek(disk,0, SEEK_SET);
       char ch;
       int i=0;
-      while (i<8192)
+      while (i<8192)//read through block allocation map.
        {
 	ch=getc(disk);
             if(ch=='0')
@@ -62,12 +63,12 @@ int getfreeblock()
         }
       printf("\n%d",i);
       fseek(disk,i,SEEK_SET);
-      fputc('1',disk);
-	fclose(disk);
+      fputc('1',disk);//to represent the block is occupied now.
+      fclose(disk);
       return i;
 }  
  
-
+//returns the no of records in the file.it is no of lines in file -1(since fist line represnts attribute names.)
 int number_of_records(FILE *fp)
 {	
 	fseek(fp,0,SEEK_SET);
@@ -81,6 +82,7 @@ int number_of_records(FILE *fp)
 	//where to write fclose??
 }
 
+//this function checks if a relation named filename already exists in the disk
 int check_rel_exists(char *filename)
 {
 	char s[5];
@@ -89,11 +91,12 @@ int check_rel_exists(char *filename)
 	int curr_blk=4;int next_blk;
 	while(curr_blk!=-1)
 	{
+		//checks in the relation catalog if there is a relation named filename already exists
 		fseek(disk,curr_blk*2048+12,SEEK_SET);
 		fgets(s,5,disk);
 		next_blk=atoi(s);
 		int no_of_entries;
-	
+	 	
 		fseek(disk,curr_blk*2048+16,SEEK_SET);
 		fgets(s,5,disk);
 		no_of_entries=atoi(s);
@@ -113,6 +116,7 @@ int check_rel_exists(char *filename)
 	return 0;
 }
 
+//The file 'filename' contains relation to be  imported in the disk.
 void parse(char *filename)
 {
      FILE *file=fopen(filename,"r");
@@ -128,12 +132,12 @@ void parse(char *filename)
         len++;
         attr=realloc(attr,(len)*sizeof(char));
     }
- 	
+    //attr stores the first line of the file.it contains the names of attributes seperated by commas
     
 
      attr[len-1]='\0';
      int i=0,j,k;
-
+       //attribute is an array of strings in which each element stores the name of attribute
        char attribute[count][16];
        j=0;
 	while(j<count)
@@ -147,7 +151,7 @@ void parse(char *filename)
 	}
 	i=0;
 	
-
+	//attr_type stores the second line of the file.
 	char *attr_type=malloc(sizeof(char));
 	len=1;
 	while((ch = fgetc(file)) != '\n') 
@@ -158,7 +162,8 @@ void parse(char *filename)
     	}
     	 attr_type[len-1]='\0';
     	 i=0;
-
+	  //attribute_type is an array of strings in which each element stores the type of attribute from the attribute values in 
+	  //second line
        	char attribute_type[count][16];
     	j=0;
 	while(j<count)
@@ -185,6 +190,7 @@ void parse(char *filename)
 		printf("%s\n",attribute_type[i++]);
 		int offset=i;
 	}
+	//newfilename stores the relation name. if sample.csv is filename then sample is relation name
 	char newfilename[(strlen(filename))-4];
 	int loopv=0;
 	while(filename[loopv]!='.')
@@ -199,6 +205,7 @@ void parse(char *filename)
 			printf("\n RELATION OF SAME NAME ALREADY EXISTS!!\n");
 			return;
 		}
+	//attrcat function fills the attribute catalog.
 	attrcat(newfilename,attribute,attribute_type,count,"-1","-1");
 	//relcat("RELATION1",count,3,7,8,9);
 	//relcat("RELATION2",count,3,7,8,9);

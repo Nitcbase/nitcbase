@@ -37,7 +37,7 @@ StaticBuffer::~StaticBuffer(){
     }
 }
 
-int StaticBuffer::getFreeBuffer(int blockNum){
+static int StaticBuffer::getFreeBuffer(int blockNum){
     // increase the time stamps in metainfo of all the occupied buffers.
     for(int it = 0;it<32;it++)
     {
@@ -84,7 +84,7 @@ int StaticBuffer::getFreeBuffer(int blockNum){
 }
 
 
- int StaticBuffer::getBufferNum(int blockNum){
+ static int StaticBuffer::getBufferNum(int blockNum){
     //traverse through the metainfo array, find the buffer index of the buffer to which the block is loaded.
      int bufferIndex = -1;
      for(int it = 0;it < 32;it++)
@@ -104,10 +104,15 @@ int StaticBuffer::getFreeBuffer(int blockNum){
 }
 
 
-int StaticBuffer::getStaticBlockType(int blockNum){
+static int StaticBuffer::getStaticBlockType(int blockNum){
     //traverse the blockAllocMap to find the type corresponding to blockNum.
     //doubt
     
     //return the blockType obtained(REC/IND_INTERNAL/IND_LEAF/UNUSED)
     return (int)blockAllocMap[blockNum];
+}
+
+static void StaticBuffer::setDirtyBit(int blockNum){
+    int bufferNum = getBufferNum(blockNum);
+    metainfo[bufferNum].dirty = true;
 }

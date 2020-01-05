@@ -76,7 +76,7 @@ public:
 class IndInternal : public IndBuffer{
 public:
 	IndInternal();//update in documentation
-	IndInternal(int blk_no);
+	IndInternal(int blockNum);
 	int getEntry(void *ptr, int indexNum) ;
 	int setEntry(void *ptr, int indexNum) ;
 };

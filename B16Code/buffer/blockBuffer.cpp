@@ -55,6 +55,7 @@ void BlockBuffer::setHeader(struct HeadInfo *head){
 	
 //copy the contents of the memory location pointed to by the argument head to the header of block using appropriate type casting
 	*((struct HeadInfo*) (startOfBuffer)) = *head;
+	setDirtyBit(this->blockNum);
 
 }
 
@@ -132,6 +133,7 @@ unsigned char * startOfBuffer = getBufferPtr();
 
 //update the BlockAllocMap 
 staticBuffer.blockAllocMap[this->blockNum] = (unsigned char) blockType;
+setDirtyBit(this->blockNum);
 	
 }
 
@@ -148,7 +150,7 @@ void RecBuffer::getSlotMap(unsigned char *slotMap){
 void RecBuffer::setSlotMap(unsigned char *slotMap){
 	unsigned char *bufferPtr = getBufferPtr();
 	int numOfSlots=*((int32_t*) (bufferPtr + 6*4));
-	//TODO : update dirty bit
+	setDirtyBit(this->blockNum);
 /*	for(int i=0; i<32; i++)
 	    if(this->blockNum == staticBuffer.metainfo[i].blockNum)
 	        staticBuffer.metainfo[i].dirty = true;*/ 
@@ -178,7 +180,7 @@ int RecBuffer::setRecord(union Attribute *rec,int slotNum){  //return type to be
 	if(slotNum < 0 || slotNum > numOfSlots - 1)
 		return E_OUTOFBOUND;
 	memcpy((void*)rec, (void*)(bufferPtr + 32 + numOfSlots +(slotNum*numOfAttrib)*ATTR_SIZE), numOfAttrib*ATTR_SIZE);
-	//TODO : update dirty bit
+	setDirtyBit(this->blockNum);//update dirty bit
 	return SUCCESS;
 }
 
@@ -209,7 +211,7 @@ int IndInternal::setEntry(void *ptr, int indexNum){
     struct InternalEntry Entry;
     Entry = (*(struct InternalEntry*)ptr);
 	*((struct InternalEntry*) (bufferPtr + 32 + indexNum*24)) = Entry;
-	//TODO : update dirty bit
+	setDirtyBit(this->blockNum);//update dirty bit
     return SUCCESS;
 
 }
@@ -250,7 +252,7 @@ int IndLeaf::setEntry(void *ptr, int indexNum){
     struct Index Entry;
     Entry = (*(struct Index*)ptr);
 	*((struct Index*) (bufferPtr + 32 + indexNum*32)) = Entry;
-	//TODO : update dirty bit
+	setDirtyBit(this->blockNum);//update dirty bit
     return SUCCESS;
 }
 

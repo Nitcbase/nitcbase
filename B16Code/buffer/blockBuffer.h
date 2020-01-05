@@ -69,8 +69,8 @@ class IndBuffer : public BlockBuffer{
 public:
 	IndBuffer(int blockNum);
 	IndBuffer(char blockType);
-	virtual int getEntry(void *ptr, int indexNum) = 0; //To be updated in documentation
-	virtual int setEntry(void *ptr, int indexNum) = 0; //To be updated in documentation
+	virtual int getEntry(void *ptr, int indexNum) = 0; 
+	virtual int setEntry(void *ptr, int indexNum) = 0; 
 };
 
 class IndInternal : public IndBuffer{

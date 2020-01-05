@@ -41,7 +41,6 @@ unsigned char * BlockBuffer::getBufferPtr(){
 }
 
 void BlockBuffer::getHeader(struct HeadInfo *head){	
-/***To be updated: make it camel case***/
 // get the starting address of the buffer containing the block using getBufferPtr. 
 	 unsigned char * startOfBuffer = getBufferPtr();
 	        
@@ -51,7 +50,6 @@ void BlockBuffer::getHeader(struct HeadInfo *head){
 }
 
 void BlockBuffer::setHeader(struct HeadInfo *head){
-/***To be updated: make it camel case***/
 // get the starting address of the buffer containing the block using getBufferPtr.
 	unsigned char * startOfBuffer = getBufferPtr();
 	
@@ -61,7 +59,6 @@ void BlockBuffer::setHeader(struct HeadInfo *head){
 }
 
 int BlockBuffer::getBlock(){
-/***To be updated: return type must be int***/
      //check whether the block is already present in the buffer using StaticBuffer.getBufferNum() .
 		int bufferIndex = staticBuffer.getBufferNum(this->blockNum);
 		
@@ -101,7 +98,6 @@ int BlockBuffer::getFreeBlock(int blockType){
 	staticBuffer.blockAllocMap[blockNum] = (unsigned char) blockType;
    
 //update the block type of the block to the input block type using Blockbuffer.setBlockType().
-/***To be updated: no need for Blockbuffer.setBlockType()***/
 	setBlockType(blockType);
 	
    
@@ -119,7 +115,6 @@ int BlockBuffer::getBlockNum(){
 int BlockBuffer::getBlockType(int bufferIndex){
 
 //blocks[bufferIndex][0] gives the staring address of the buffer
-/***To be updated:[0] is not required***/
 unsigned char * startOfBuffer = staticBuffer.blocks[bufferIndex];
 
 //retrieve the first 4 bytes of the buffer that stores the block type.
@@ -130,7 +125,6 @@ unsigned char * startOfBuffer = staticBuffer.blocks[bufferIndex];
 
 void BlockBuffer::setBlockType(int blockType){						
 //find the starting address of the buffer using BlockBuffer.getBufferPtr()
-/***To be updated: no need for BlockBuffer.***/
 unsigned char * startOfBuffer = getBufferPtr();
 
 //store the given block type in the first 4 bytes of the buffer
@@ -225,14 +219,13 @@ IndLeaf::IndLeaf() : IndBuffer('L'){}
 IndLeaf::IndLeaf(int blockNum) : IndBuffer(blockNum){}
 
 int IndLeaf::getEntry(void *ptr, int indexNum){
-/***To be updated: camel case for index_num.***/
 
 // get the starting address of the buffer containing the block using BlockBuffer.getBufferPtr().
 /***To be updated: no need for BlockBuffer.***/
 unsigned char * startOfBuffer = getBufferPtr();
 
 // if the indexNum is not in range of 0-(#Entries(in block)+1), return E_OUTOFBOUND
-/***To be updated: not + 1.***/
+
 int numEntries = *((int32_t *)(startOfBuffer + 4 * 4));
 
 if((indexNum<0) || indexNum > numEntries)
@@ -251,7 +244,6 @@ if((indexNum<0) || indexNum > numEntries)
 
 int IndLeaf::setEntry(void *ptr, int indexNum){						
     unsigned char* bufferPtr = getBufferPtr();
-    //TODO : update #Entries(in block)-1
     int numOfEntries = *((int32_t*) (bufferPtr + 4*4));
     if(indexNum<0 || indexNum > numOfEntries - 1) //to be updated 
         return E_OUTOFBOUND;

@@ -1,3 +1,0 @@
-/home/pravitha/Desktop/MAJORPROJECT/disk/xfs_interface_new
-SELECT NO FROM sample INTO R7 WHERE NAME=ABC;
-SELECT NO,NAME FROM sample INTO R9 WHERE NAME!=ABC;

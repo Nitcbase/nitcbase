@@ -1,9 +1,8 @@
-
 # Ignore Mac system files
 .DS_store
 
 # Ignore cmake debug files
 /B18_Code/cmake-build-debug
 
-
-
+# Igonre .idea folder files
+/B18_Code/.idea/

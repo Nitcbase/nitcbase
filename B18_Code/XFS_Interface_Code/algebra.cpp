@@ -1,15 +1,62 @@
 //Todo :  how to check if conversion fails
 //In join should u swap the relations depending on number of attributes
 
-
-
 /*#include "schema.cpp"
-#include <bits/stdc++.h>
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
-
 using namespace std;*/
+
+
+int insert(char relname[ATTR_SIZE], int nAttrs, char record[][ATTR_SIZE]) {
+
+	// get the relation's open relation id(let it be rel_id), using getRelId() method of Openreltable
+	// if relation is not opened in Openreltable, return E_RELNOTOPEN
+	int relid = getRelId(relname);
+	if (relid == E_RELNOTOPEN)
+		return relid;
+
+
+	//get the no. of attributes present in relation, from RelcatEntry present in Openreltable(using getRelCatEntry() method).
+	//if nAttrs!=no_of_attrs in relation, return E_NATTRMISMATCH
+	union Attribute relcat_entry[6];
+	getRelCatEntry(relid, relcat_entry);
+	int noAttrs = relcat_entry[1].ival;
+	if (noAttrs != nAttrs)
+		return E_NATTRMISMATCH;
+
+	union Attribute recval[nAttrs];
+
+	/*iterate through 0 to nAttrs-1 :
+		get the i'th attribute's AttrCatEntry (using getAttrcatEntry() of Openreltable )
+	*/
+	// let type=attrcatentry.attr_type;
+	union Attribute attrcat_entry[6];
+	recId prev_recid;
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+	recId recid;
+	char attrName[ATTR_SIZE];
+	strcpy(attrName, "RelName");
+	union Attribute a;
+	strcpy(a.sval, OpenRelTable[relid]);
+	for (int i = 0; i < nAttrs; i++) {
+
+		recid = linear_search(ATTRCAT_RELID, attrName, a, EQ, &prev_recid);
+		getRecord(attrcat_entry, recid.block, recid.slot);
+		int type = attrcat_entry[2].ival;
+		if (type == INT)
+			recval[i].ival = stoi(record[i]);
+		else if (type == FLOAT)
+			recval[i].fval = stof(record[i]);
+		else if (type == STRING)
+			strcpy(recval[i].sval, record[i]);
+
+
+	}
+
+	int retval = ba_insert(relid, recval);
+	return retval;
+
+	//return retval
+}
 
 int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZE], int op, char strval[ATTR_SIZE]) {
 
@@ -150,7 +197,6 @@ int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZ
 
 }
 
-
 int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, char tar_attrs[][ATTR_SIZE]) {
 	//cout<<"reached project"<<endl;
 	int srcrelid, targetrelid;
@@ -222,60 +268,6 @@ int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, c
 	}
 	closeRel(targetrelid);
 	return SUCCESS;
-}
-
-
-int insert(char relname[ATTR_SIZE], int nAttrs, char record[][ATTR_SIZE]) {
-
-	// get the relation's open relation id(let it be rel_id), using getRelId() method of Openreltable
-	// if relation is not opened in Openreltable, return E_RELNOTOPEN
-	int relid = getRelId(relname);
-	if (relid == E_RELNOTOPEN)
-		return relid;
-
-
-	//get the no. of attributes present in relation, from RelcatEntry present in Openreltable(using getRelCatEntry() method).
-	//if nAttrs!=no_of_attrs in relation, return E_NATTRMISMATCH
-	union Attribute relcat_entry[6];
-	getRelCatEntry(relid, relcat_entry);
-	int noAttrs = relcat_entry[1].ival;
-	if (noAttrs != nAttrs)
-		return E_NATTRMISMATCH;
-
-	union Attribute recval[nAttrs];
-
-	/*iterate through 0 to nAttrs-1 :
-		get the i'th attribute's AttrCatEntry (using getAttrcatEntry() of Openreltable )
-	*/
-	// let type=attrcatentry.attr_type;
-	union Attribute attrcat_entry[6];
-	recId prev_recid;
-	prev_recid.block = -1;
-	prev_recid.slot = -1;
-	recId recid;
-	char attrName[ATTR_SIZE];
-	strcpy(attrName, "RelName");
-	union Attribute a;
-	strcpy(a.sval, OpenRelTable[relid]);
-	for (int i = 0; i < nAttrs; i++) {
-
-		recid = linear_search(ATTRCAT_RELID, attrName, a, EQ, &prev_recid);
-		getRecord(attrcat_entry, recid.block, recid.slot);
-		int type = attrcat_entry[2].ival;
-		if (type == INT)
-			recval[i].ival = stoi(record[i]);
-		else if (type == FLOAT)
-			recval[i].fval = stof(record[i]);
-		else if (type == STRING)
-			strcpy(recval[i].sval, record[i]);
-
-
-	}
-
-	int retval = ba_insert(relid, recval);
-	return retval;
-
-	//return retval
 }
 
 int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr1[ATTR_SIZE],

@@ -3,7 +3,6 @@
 
 #include "bplustree.cpp"
 
-
 int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtype[]) {
 	//cout<<"in create rel..."<<endl;
 	/*for(int i=0;i<nAttrs;i++)
@@ -92,8 +91,8 @@ int openRel(char RelName[16]) {
 	}
 }
 
-int closeRel(int relid)    //return 0 on success
-{
+int closeRel(int relid) {   //return 0 on success
+
 	if (relid < 0 || relid >= MAXOPEN) {
 		return E_OUTOFBOUND;
 	}

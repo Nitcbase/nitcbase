@@ -1,0 +1,3 @@
+/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles/NITCbase.dir

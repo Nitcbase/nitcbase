@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
-project(NITCbase)
+project(B18_Code)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(NITCbase XFS_Interface_Code/disksimulator.cpp XFS_Interface_Code/interface_stack.cpp XFS_Interface_Code/block_access.hpp)
+add_executable(B18_Code main.cpp Disk.cpp Disk.h)

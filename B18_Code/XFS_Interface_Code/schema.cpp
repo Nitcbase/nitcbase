@@ -3,6 +3,13 @@
 
 #include "bplustree.cpp"
 
+int getRelId(char relname[16]) {
+	for (int i = 0; i < 12; i++)
+		if (strcmp(OpenRelTable[i], relname) == 0)
+			return i;
+	return E_RELNOTOPEN;
+}
+
 int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtype[]) {
 	//cout<<"in create rel..."<<endl;
 	/*for(int i=0;i<nAttrs;i++)
@@ -101,13 +108,6 @@ int closeRel(int relid) {   //return 0 on success
 	}
 	strcpy(OpenRelTable[relid], "NULL");
 	return 0;
-}
-
-int getRelId(char relname[16]) {
-	for (int i = 0; i < 12; i++)
-		if (strcmp(OpenRelTable[i], relname) == 0)
-			return i;
-	return E_RELNOTOPEN;
 }
 
 int deleteRel(char relname[ATTR_SIZE]) {

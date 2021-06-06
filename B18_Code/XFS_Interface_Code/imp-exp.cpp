@@ -4,7 +4,7 @@
 using namespace std;
 
 #include "schema.cpp"
-#include "algebra.cpp"
+//#include "algebra.cpp"
 //#include "algebra.cpp"
 
 //TO DO

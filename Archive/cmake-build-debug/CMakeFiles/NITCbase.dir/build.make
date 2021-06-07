@@ -62,10 +62,10 @@ RM = /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code
+CMAKE_SOURCE_DIR = /Users/gokulsreekumar/NITCBase/nitcbase/Archive
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug
+CMAKE_BINARY_DIR = /Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug
 
 # Include any dependencies generated for this target.
 include CMakeFiles/NITCbase.dir/depend.make
@@ -78,29 +78,29 @@ include CMakeFiles/NITCbase.dir/flags.make
 
 CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.o: CMakeFiles/NITCbase.dir/flags.make
 CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.o: ../XFS_Interface_Code/disksimulator.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.o -c /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/disksimulator.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.o -c /Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/disksimulator.cpp
 
 CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/disksimulator.cpp > CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/disksimulator.cpp > CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.i
 
 CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/disksimulator.cpp -o CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/disksimulator.cpp -o CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.s
 
 CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.o: CMakeFiles/NITCbase.dir/flags.make
 CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.o: ../XFS_Interface_Code/interface_stack.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.o -c /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/interface_stack.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.o -c /Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/interface_stack.cpp
 
 CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/interface_stack.cpp > CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/interface_stack.cpp > CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.i
 
 CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/interface_stack.cpp -o CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/interface_stack.cpp -o CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.s
 
 # Object files for target NITCbase
 NITCbase_OBJECTS = \
@@ -114,7 +114,7 @@ NITCbase: CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.o
 NITCbase: CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.o
 NITCbase: CMakeFiles/NITCbase.dir/build.make
 NITCbase: CMakeFiles/NITCbase.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable NITCbase"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable NITCbase"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/NITCbase.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -127,6 +127,6 @@ CMakeFiles/NITCbase.dir/clean:
 .PHONY : CMakeFiles/NITCbase.dir/clean
 
 CMakeFiles/NITCbase.dir/depend:
-	cd /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles/NITCbase.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/gokulsreekumar/NITCBase/nitcbase/Archive /Users/gokulsreekumar/NITCBase/nitcbase/Archive /Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug /Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug /Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug/CMakeFiles/NITCbase.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/NITCbase.dir/depend
 

@@ -1,0 +1,1 @@
+/usr/bin/g++ -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/B18_Code.dir/main.cpp.o CMakeFiles/B18_Code.dir/Disk.cpp.o -o B18_Code 

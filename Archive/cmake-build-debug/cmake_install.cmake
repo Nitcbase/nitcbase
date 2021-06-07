@@ -1,4 +1,4 @@
-# Install script for directory: /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code
+# Install script for directory: /Users/gokulsreekumar/NITCBase/nitcbase/Archive
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

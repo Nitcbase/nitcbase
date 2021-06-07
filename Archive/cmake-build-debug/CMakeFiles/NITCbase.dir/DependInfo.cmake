@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/disksimulator.cpp" "/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.o"
-  "/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/interface_stack.cpp" "/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.o"
+  "/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/disksimulator.cpp" "/Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug/CMakeFiles/NITCbase.dir/XFS_Interface_Code/disksimulator.cpp.o"
+  "/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/interface_stack.cpp" "/Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug/CMakeFiles/NITCbase.dir/XFS_Interface_Code/interface_stack.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "AppleClang")
 

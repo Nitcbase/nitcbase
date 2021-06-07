@@ -6,17 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/algebra.cpp
-bits/stdc++.h
--
-stdio.h
--
-string.h
--
-stdlib.h
--
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/algebra.cpp
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/block_access.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/block_access.cpp
 stdio.h
 -
 string.h
@@ -26,61 +18,61 @@ bits/stdc++.h
 cstring
 -
 disksimulator.hpp
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/disksimulator.hpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/disksimulator.hpp
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/bplustree.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/bplustree.cpp
 block_access.cpp
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/block_access.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/block_access.cpp
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/disk_structure.h
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/disk_structure.h
 ../define/constants.h
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/define/constants.h
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/define/constants.h
 ../define/errors.h
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/define/errors.h
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/define/errors.h
 cstdint
 -
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/disksimulator.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/disksimulator.cpp
 ../define/constants.h
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/define/constants.h
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/define/constants.h
 iostream
 -
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/disksimulator.hpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/disksimulator.hpp
 iostream
 -
 ../define/constants.h
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/define/constants.h
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/define/constants.h
 disk_structure.h
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/disk_structure.h
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/disk_structure.h
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/imp-exp.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/imp-exp.cpp
 stdio.h
 -
 stdlib.h
 -
 schema.cpp
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/schema.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/schema.cpp
 algebra.cpp
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/algebra.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/algebra.cpp
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/interface.h
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/interface.h
 regex
 -
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/interface_stack.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/interface_stack.cpp
 iostream
 -
 interface.h
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/interface.h
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/interface.h
 imp-exp.cpp
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/imp-exp.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/imp-exp.cpp
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/schema.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/schema.cpp
 bplustree.cpp
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/XFS_Interface_Code/bplustree.cpp
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/XFS_Interface_Code/bplustree.cpp
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/define/constants.h
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/define/constants.h
 
-/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/define/errors.h
+/Users/gokulsreekumar/NITCBase/nitcbase/Archive/define/errors.h
 
